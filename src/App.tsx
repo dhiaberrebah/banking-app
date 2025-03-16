@@ -1,4 +1,3 @@
-// src/App.tsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/auth-context";
@@ -20,7 +19,9 @@ import AdminOverviewPage from "./pages/admin/overview";
 import UsersManagementPage from "./pages/admin/users-management";
 import AccountsManagementPage from "./pages/admin/accounts-management";
 import NotFoundPage from "./pages/not-found-page";
-
+import AdminSettingsPage from "./pages/admin/admin-settings"
+import ActivityLogsPage from "./pages/admin/activity-logs";
+import LoanApplicationsPage from "./pages/admin/loan-applications";
 function App() {
   return (
     <AuthProvider>
@@ -94,6 +95,9 @@ function App() {
             <Route path="users" element={<UsersManagementPage />} />
             <Route path="accounts" element={<AccountsManagementPage />} />
             {/* Add more admin routes as needed */}
+            <Route path="activity" element={<ActivityLogsPage />} />
+            <Route path="loans" element={<LoanApplicationsPage />} />
+            <Route path="settings" element={<AdminSettingsPage />} />
           </Route>
 
           {/* 404 page */}
