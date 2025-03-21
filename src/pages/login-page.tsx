@@ -1,46 +1,49 @@
-import React, { useState, FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/auth-context';
+"use client"
+
+import type React from "react"
+import { useState, type FormEvent } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../contexts/auth-context"
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [email, setEmail] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
+  const [error, setError] = useState<string>("")
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    setError("")
 
     try {
       // Validate inputs
       if (!email || !password) {
-        throw new Error('Please fill in all fields');
+        throw new Error("Please fill in all fields")
       }
 
       // Attempt login
-      const success = login(email, password);
-      
+      const success = await login(email, password)
+
       if (success) {
         // Redirect to home page after successful login
-        navigate('/');
+        navigate("/")
       } else {
-        throw new Error('Invalid email or password');
+        throw new Error("Invalid email or password")
       }
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message);
+        setError(err.message)
       }
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
+          Or{" "}
           <Link to="/register" className="font-medium text-blue-900 hover:text-blue-800">
             create a new account
           </Link>
@@ -54,7 +57,7 @@ const LoginPage: React.FC = () => {
               <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
-          
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -111,7 +114,7 @@ const LoginPage: React.FC = () => {
                 <span className="px-2 bg-white text-gray-500">Demo accounts</span>
               </div>
             </div>
-            
+
             <div className="mt-6 grid grid-cols-1 gap-3">
               <div className="border rounded-md p-3">
                 <p className="text-sm font-medium text-gray-700">Admin User</p>
@@ -128,7 +131,8 @@ const LoginPage: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage
+

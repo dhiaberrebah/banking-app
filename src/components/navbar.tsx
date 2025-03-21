@@ -1,25 +1,28 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X, ChevronDown, User, LogOut } from 'lucide-react';
-import { useAuth } from "../contexts/auth-context";
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { Link } from "react-router-dom"
+import { Menu, X, ChevronDown, User, LogOut } from "lucide-react"
+import { useAuth } from "../contexts/auth-context"
 
 const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
-  const { currentUser, logout, isAdmin } = useAuth();
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false)
+  const { currentUser, logout, isAdmin } = useAuth()
 
   const toggleMenu = (): void => {
-    setIsOpen(!isOpen);
-  };
+    setIsOpen(!isOpen)
+  }
 
   const toggleDropdown = (): void => {
-    setDropdownOpen(!dropdownOpen);
-  };
+    setDropdownOpen(!dropdownOpen)
+  }
 
   const handleLogout = (): void => {
-    logout();
-    setDropdownOpen(false);
-  };
+    logout()
+    setDropdownOpen(false)
+  }
 
   return (
     <nav className="bg-blue-900 text-white">
@@ -191,7 +194,8 @@ const Navbar: React.FC = () => {
         </div>
       )}
     </nav>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar
+

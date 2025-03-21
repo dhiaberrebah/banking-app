@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Home } from 'lucide-react';
+import type React from "react"
+import { Link } from "react-router-dom"
+import { Home } from "lucide-react"
 
 const NotFoundPage: React.FC = () => {
   return (
@@ -22,7 +22,8 @@ const NotFoundPage: React.FC = () => {
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default NotFoundPage;
+export default NotFoundPage
+

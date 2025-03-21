@@ -1,22 +1,41 @@
+"use client"
+
 // src/layouts/dashboard-layout.tsx
-import React, { useState } from "react";
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import { CreditCard, Send, Settings, Menu, X, LogOut, Home, Bell, Search, PiggyBank, MessageSquare } from 'lucide-react';
-import { useAuth } from "../contexts/auth-context";
+import type React from "react"
+import { useState } from "react"
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom"
+import {
+  CreditCard,
+  Send,
+  Settings,
+  Menu,
+  X,
+  LogOut,
+  Home,
+  Search,
+  PiggyBank,
+  MessageSquare,
+  Bell,
+  FileText,
+  Receipt,
+} from "lucide-react"
+import { useAuth } from "../contexts/auth-context"
+import NotificationBell from "../components/notification-bell"
 
 const DashboardLayout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { currentUser, logout } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+    logout()
+    navigate("/login")
+  }
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+    setSidebarOpen(!sidebarOpen)
+  }
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
@@ -107,10 +126,7 @@ const DashboardLayout: React.FC = () => {
               </div>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
-              <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900">
-                <span className="sr-only">View notifications</span>
-                <Bell className="h-6 w-6" />
-              </button>
+              <NotificationBell />
 
               <div className="ml-3 relative">
                 <div className="flex items-center">
@@ -130,56 +146,103 @@ const DashboardLayout: React.FC = () => {
         </main>
       </div>
     </div>
-  );
-};
+  )
+}
 
 const SidebarLinks = () => {
+  const location = useLocation()
+
+  // Check if the current path matches the given path
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`)
+  }
+
   return (
     <>
       <Link
         to="/dashboard"
-        className="text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+        className={`text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+          isActive("/dashboard") && location.pathname === "/dashboard" ? "bg-blue-800" : ""
+        }`}
       >
         <Home className="mr-3 h-5 w-5" />
         Dashboard
       </Link>
       <Link
         to="/dashboard/accounts"
-        className="text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+        className={`text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+          isActive("/dashboard/accounts") ? "bg-blue-800" : ""
+        }`}
       >
         <CreditCard className="mr-3 h-5 w-5" />
         My Accounts
       </Link>
       <Link
+        to="/dashboard/transactions"
+        className={`text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+          isActive("/dashboard/transactions") ? "bg-blue-800" : ""
+        }`}
+      >
+        <FileText className="mr-3 h-5 w-5" />
+        Transaction History
+      </Link>
+      <Link
         to="/dashboard/transfer"
-        className="text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+        className={`text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+          isActive("/dashboard/transfer") ? "bg-blue-800" : ""
+        }`}
       >
         <Send className="mr-3 h-5 w-5" />
         Transfer Money
       </Link>
       <Link
+        to="/dashboard/bill-payment"
+        className={`text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+          isActive("/dashboard/bill-payment") ? "bg-blue-800" : ""
+        }`}
+      >
+        <Receipt className="mr-3 h-5 w-5" />
+        Bill Payments
+      </Link>
+      <Link
         to="/dashboard/loans"
-        className="text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+        className={`text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+          isActive("/dashboard/loans") ? "bg-blue-800" : ""
+        }`}
       >
         <PiggyBank className="mr-3 h-5 w-5" />
         Loan Simulator
       </Link>
       <Link
+        to="/dashboard/notifications"
+        className={`text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+          isActive("/dashboard/notifications") ? "bg-blue-800" : ""
+        }`}
+      >
+        <Bell className="mr-3 h-5 w-5" />
+        Notifications
+      </Link>
+      <Link
         to="/dashboard/support"
-        className="text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+        className={`text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+          isActive("/dashboard/support") ? "bg-blue-800" : ""
+        }`}
       >
         <MessageSquare className="mr-3 h-5 w-5" />
         Support
       </Link>
       <Link
         to="/dashboard/settings"
-        className="text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+        className={`text-white hover:bg-blue-800 group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+          isActive("/dashboard/settings") ? "bg-blue-800" : ""
+        }`}
       >
         <Settings className="mr-3 h-5 w-5" />
         Settings
       </Link>
     </>
-  );
-};
+  )
+}
 
-export default DashboardLayout;
+export default DashboardLayout
+

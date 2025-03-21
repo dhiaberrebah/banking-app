@@ -1,21 +1,22 @@
-import { Link } from "react-router-dom";
-import { Users, CreditCard, FileText, Activity, TrendingUp, TrendingDown } from 'lucide-react';
-import { mockSystemUsers, mockAccounts, mockLoanApplications, mockActivityLogs } from "../../data/mock-data";
+import type React from "react"
+import { Link } from "react-router-dom"
+import { Users, CreditCard, FileText, Activity, TrendingUp, TrendingDown } from "lucide-react"
+import { mockSystemUsers, mockAccounts, mockLoanApplications, mockActivityLogs } from "../../data/mock-data"
 
 const AdminOverviewPage: React.FC = () => {
   // Count active users
-  const activeUsers = mockSystemUsers.filter((user) => user.role === "user" && user.status !== "inactive").length;
+  const activeUsers = mockSystemUsers.filter((user) => user.role === "user" && user.status !== "inactive").length
 
   // Count active accounts
-  const activeAccounts = mockAccounts.filter((account) => account.status === "active").length;
+  const activeAccounts = mockAccounts.filter((account) => account.status === "active").length
 
   // Count pending loan applications
-  const pendingLoans = mockLoanApplications.filter((loan) => loan.status === "pending").length;
+  const pendingLoans = mockLoanApplications.filter((loan) => loan.status === "pending").length
 
   // Get recent activity logs
   const recentLogs = [...mockActivityLogs]
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    .slice(0, 5);
+    .slice(0, 5)
 
   return (
     <div>
@@ -216,7 +217,8 @@ const AdminOverviewPage: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AdminOverviewPage;
+export default AdminOverviewPage
+

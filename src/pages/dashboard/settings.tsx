@@ -1,86 +1,89 @@
+"use client"
+
 // src/pages/dashboard/settings.tsx
-import React, { useState } from "react";
-import { Save, RefreshCw, Lock, Bell, Shield, User, Check } from 'lucide-react'; // Ajout de Check ici
-import { useAuth } from "../../contexts/auth-context";
+import type React from "react"
+import { useState } from "react"
+import { Save, RefreshCw, Lock, Bell, Shield, User, Check } from "lucide-react" // Ajout de Check ici
+import { useAuth } from "../../contexts/auth-context"
 
 // Le reste du code reste inchangé
 
 const UserSettingsPage: React.FC = () => {
-  const { currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState("profile");
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  
+  const { currentUser } = useAuth()
+  const [activeTab, setActiveTab] = useState("profile")
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+
   // Profile settings
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || "",
     email: currentUser?.email || "",
     phone: "+216 71 234 567",
     address: "123 Main St, Tunis, Tunisia",
-    language: "en"
-  });
-  
+    language: "en",
+  })
+
   // Security settings
   const [securityData, setSecurityData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-    twoFactorEnabled: false
-  });
-  
+    twoFactorEnabled: false,
+  })
+
   // Notification settings
   const [notificationData, setNotificationData] = useState({
     emailNotifications: true,
     smsNotifications: true,
     pushNotifications: false,
-    marketingEmails: false
-  });
-  
+    marketingEmails: false,
+  })
+
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setProfileData(prev => ({
+    const { name, value } = e.target
+    setProfileData((prev) => ({
       ...prev,
-      [name]: value
-    }));
-  };
-  
+      [name]: value,
+    }))
+  }
+
   const handleSecurityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setSecurityData(prev => ({
+    const { name, value, type, checked } = e.target
+    setSecurityData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-  
+      [name]: type === "checkbox" ? checked : value,
+    }))
+  }
+
   const handleNotificationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setNotificationData(prev => ({
+    const { name, checked } = e.target
+    setNotificationData((prev) => ({
       ...prev,
-      [name]: checked
-    }));
-  };
-  
+      [name]: checked,
+    }))
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setSaveSuccess(false);
-    
+    e.preventDefault()
+    setIsSaving(true)
+    setSaveSuccess(false)
+
     // Simulate API call
     setTimeout(() => {
-      setIsSaving(false);
-      setSaveSuccess(true);
-      
+      setIsSaving(false)
+      setSaveSuccess(true)
+
       // Reset success message after 3 seconds
       setTimeout(() => {
-        setSaveSuccess(false);
-      }, 3000);
-    }, 1000);
-  };
-  
+        setSaveSuccess(false)
+      }, 3000)
+    }, 1000)
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-semibold text-gray-900">Account Settings</h1>
-      
+
       <div className="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="border-b border-gray-200">
           <nav className="flex -mb-px">
@@ -119,7 +122,7 @@ const UserSettingsPage: React.FC = () => {
             </button>
           </nav>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="px-4 py-5 sm:p-6">
             {/* Profile Settings */}
@@ -139,7 +142,7 @@ const UserSettingsPage: React.FC = () => {
                       className="mt-1 focus:ring-blue-900 focus:border-blue-900 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                     />
                   </div>
-                  
+
                   <div className="sm:col-span-3">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                       Email Address
@@ -153,7 +156,7 @@ const UserSettingsPage: React.FC = () => {
                       className="mt-1 focus:ring-blue-900 focus:border-blue-900 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                     />
                   </div>
-                  
+
                   <div className="sm:col-span-3">
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                       Phone Number
@@ -167,7 +170,7 @@ const UserSettingsPage: React.FC = () => {
                       className="mt-1 focus:ring-blue-900 focus:border-blue-900 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                     />
                   </div>
-                  
+
                   <div className="sm:col-span-3">
                     <label htmlFor="language" className="block text-sm font-medium text-gray-700">
                       Preferred Language
@@ -184,7 +187,7 @@ const UserSettingsPage: React.FC = () => {
                       <option value="ar">Arabic</option>
                     </select>
                   </div>
-                  
+
                   <div className="sm:col-span-6">
                     <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                       Address
@@ -201,7 +204,7 @@ const UserSettingsPage: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             {/* Security Settings */}
             {activeTab === "security" && (
               <div className="space-y-6">
@@ -211,7 +214,7 @@ const UserSettingsPage: React.FC = () => {
                     Ensure your account is using a strong password to stay secure.
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                   <div className="sm:col-span-6">
                     <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
@@ -226,7 +229,7 @@ const UserSettingsPage: React.FC = () => {
                       className="mt-1 focus:ring-blue-900 focus:border-blue-900 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                     />
                   </div>
-                  
+
                   <div className="sm:col-span-3">
                     <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
                       New Password
@@ -240,7 +243,7 @@ const UserSettingsPage: React.FC = () => {
                       className="mt-1 focus:ring-blue-900 focus:border-blue-900 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                     />
                   </div>
-                  
+
                   <div className="sm:col-span-3">
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                       Confirm New Password
@@ -255,7 +258,7 @@ const UserSettingsPage: React.FC = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="mt-6">
                   <div className="relative flex items-start">
                     <div className="flex items-center h-5">
@@ -273,12 +276,13 @@ const UserSettingsPage: React.FC = () => {
                         Enable Two-Factor Authentication
                       </label>
                       <p className="text-gray-500">
-                        Add an extra layer of security to your account by requiring a verification code in addition to your password.
+                        Add an extra layer of security to your account by requiring a verification code in addition to
+                        your password.
                       </p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 bg-gray-50 p-4 rounded-md">
                   <div className="flex">
                     <div className="flex-shrink-0">
@@ -299,7 +303,7 @@ const UserSettingsPage: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             {/* Notification Settings */}
             {activeTab === "notifications" && (
               <div className="space-y-6">
@@ -309,7 +313,7 @@ const UserSettingsPage: React.FC = () => {
                     Manage how you receive notifications and alerts from AMEN BANK.
                   </p>
                 </div>
-                
+
                 <div className="mt-6 space-y-6">
                   <div className="relative flex items-start">
                     <div className="flex items-center h-5">
@@ -329,7 +333,7 @@ const UserSettingsPage: React.FC = () => {
                       <p className="text-gray-500">Receive account activity and security alerts via email.</p>
                     </div>
                   </div>
-                  
+
                   <div className="relative flex items-start">
                     <div className="flex items-center h-5">
                       <input
@@ -348,7 +352,7 @@ const UserSettingsPage: React.FC = () => {
                       <p className="text-gray-500">Receive account activity and security alerts via SMS.</p>
                     </div>
                   </div>
-                  
+
                   <div className="relative flex items-start">
                     <div className="flex items-center h-5">
                       <input
@@ -367,7 +371,7 @@ const UserSettingsPage: React.FC = () => {
                       <p className="text-gray-500">Receive push notifications on your mobile device.</p>
                     </div>
                   </div>
-                  
+
                   <div className="relative flex items-start">
                     <div className="flex items-center h-5">
                       <input
@@ -390,7 +394,7 @@ const UserSettingsPage: React.FC = () => {
               </div>
             )}
           </div>
-          
+
           <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
             {saveSuccess && (
               <span className="mr-4 inline-flex items-center px-4 py-2 text-sm font-medium text-green-700 bg-green-100 rounded-md">
@@ -419,7 +423,8 @@ const UserSettingsPage: React.FC = () => {
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default UserSettingsPage;
+export default UserSettingsPage
+

@@ -1,5 +1,5 @@
 // src/data/mock-data.ts
-import type { MockUser } from "../types";
+import type { MockUser, Notification, Payee, BillPayment } from "../types"
 
 // Mock Users for authentication
 export const mockUsers: MockUser[] = [
@@ -17,7 +17,7 @@ export const mockUsers: MockUser[] = [
     password: "password123",
     role: "user",
   },
-];
+]
 
 // Mock System Users (for admin panel)
 export const mockSystemUsers = [
@@ -53,7 +53,7 @@ export const mockSystemUsers = [
     status: "inactive",
     lastLogin: "2023-03-15T09:10:00Z",
   },
-];
+]
 
 // Mock Accounts
 export const mockAccounts = [
@@ -71,7 +71,7 @@ export const mockAccounts = [
     userId: 2,
     accountNumber: "TN59 0001 0001 8765 4321 0987",
     accountType: "Savings Account",
-    balance: 12500.50,
+    balance: 12500.5,
     currency: "TND",
     status: "active",
   },
@@ -89,7 +89,7 @@ export const mockAccounts = [
     userId: 3,
     accountNumber: "TN59 0001 0002 1357 2468 0987",
     accountType: "Savings Account",
-    balance: 8750.00,
+    balance: 8750.0,
     currency: "TND",
     status: "active",
   },
@@ -98,11 +98,11 @@ export const mockAccounts = [
     userId: 4,
     accountNumber: "TN59 0001 0003 9876 5432 1098",
     accountType: "Checking Account",
-    balance: 1500.30,
+    balance: 1500.3,
     currency: "TND",
     status: "inactive",
   },
-];
+]
 
 // Mock Transactions
 export const mockTransactions = [
@@ -111,7 +111,7 @@ export const mockTransactions = [
     accountId: 1,
     date: "2023-04-10T14:30:00Z",
     description: "Salary Deposit",
-    amount: 2500.00,
+    amount: 2500.0,
     type: "deposit",
   },
   {
@@ -127,7 +127,7 @@ export const mockTransactions = [
     accountId: 1,
     date: "2023-04-05T16:45:00Z",
     description: "Electric Bill",
-    amount: 85.50,
+    amount: 85.5,
     type: "withdrawal",
   },
   {
@@ -135,7 +135,7 @@ export const mockTransactions = [
     accountId: 1,
     date: "2023-04-03T09:20:00Z",
     description: "Transfer to Savings",
-    amount: 500.00,
+    amount: 500.0,
     type: "withdrawal",
   },
   {
@@ -143,7 +143,7 @@ export const mockTransactions = [
     accountId: 1,
     date: "2023-04-01T11:30:00Z",
     description: "Restaurant Payment",
-    amount: 75.80,
+    amount: 75.8,
     type: "withdrawal",
   },
   {
@@ -151,7 +151,7 @@ export const mockTransactions = [
     accountId: 2,
     date: "2023-04-03T09:25:00Z",
     description: "Transfer from Checking",
-    amount: 500.00,
+    amount: 500.0,
     type: "deposit",
   },
   {
@@ -159,10 +159,53 @@ export const mockTransactions = [
     accountId: 2,
     date: "2023-03-15T13:10:00Z",
     description: "Interest Payment",
-    amount: 25.50,
+    amount: 25.5,
     type: "deposit",
   },
-];
+]
+
+// Mock Notifications
+export const mockNotifications: Notification[] = [
+  {
+    id: 1,
+    userId: 2,
+    title: "Login Alert",
+    message: "New login detected from your account",
+    type: "info",
+    isRead: false,
+    timestamp: "2023-04-10T08:30:00Z",
+  },
+  {
+    id: 2,
+    userId: 2,
+    title: "Transfer Successful",
+    message: "Your transfer of 500 TND to Savings Account was successful",
+    type: "success",
+    isRead: false,
+    timestamp: "2023-04-03T09:20:00Z",
+    link: "/dashboard/accounts",
+  },
+  {
+    id: 3,
+    userId: 2,
+    title: "Low Balance Alert",
+    message: "Your Checking Account balance is below 1000 TND",
+    type: "warning",
+    isRead: true,
+    timestamp: "2023-04-01T11:30:00Z",
+    link: "/dashboard/accounts",
+  },
+  {
+    id: 4,
+    userId: 2,
+    title: "Security Update",
+    message: "We've enhanced our security measures. Please review your settings.",
+    type: "info",
+    isRead: true,
+    timestamp: "2023-03-28T15:45:00Z",
+    link: "/dashboard/settings",
+  },
+]
 
 // Mock Loan Products
 export const mockLoanProducts = [
@@ -206,7 +249,7 @@ export const mockLoanProducts = [
     minTerm: 12,
     maxTerm: 84,
   },
-];
+]
 
 // Mock Loan Applications
 export const mockLoanApplications = [
@@ -254,7 +297,7 @@ export const mockLoanApplications = [
     applicationDate: "2023-04-08T13:20:00Z",
     approvalDate: null,
   },
-];
+]
 
 // Mock Activity Logs
 export const mockActivityLogs = [
@@ -314,4 +357,121 @@ export const mockActivityLogs = [
     ipAddress: "192.168.1.1",
     timestamp: "2023-04-01T10:15:00Z",
   },
-];
+]
+
+// Mock Payees
+export const mockPayees: Payee[] = [
+  {
+    id: 1,
+    userId: 2,
+    name: "STEG - Electricity",
+    accountNumber: "TN59 0002 0001 1234 5678 9012",
+    category: "utility",
+    isActive: true,
+  },
+  {
+    id: 2,
+    userId: 2,
+    name: "SONEDE - Water",
+    accountNumber: "TN59 0002 0002 1234 5678 9012",
+    category: "utility",
+    isActive: true,
+  },
+  {
+    id: 3,
+    userId: 2,
+    name: "Ooredoo - Mobile",
+    accountNumber: "TN59 0002 0003 1234 5678 9012",
+    category: "telecom",
+    isActive: true,
+  },
+  {
+    id: 4,
+    userId: 2,
+    name: "Tunisie Telecom",
+    accountNumber: "TN59 0002 0004 1234 5678 9012",
+    category: "telecom",
+    isActive: true,
+  },
+  {
+    id: 5,
+    userId: 2,
+    name: "COMAR Insurance",
+    accountNumber: "TN59 0002 0005 1234 5678 9012",
+    category: "insurance",
+    isActive: true,
+  },
+  {
+    id: 6,
+    userId: 3,
+    name: "STEG - Electricity",
+    accountNumber: "TN59 0002 0001 1234 5678 9012",
+    category: "utility",
+    isActive: true,
+  },
+]
+
+// Mock Bill Payments
+export const mockBillPayments: BillPayment[] = [
+  {
+    id: 1,
+    userId: 2,
+    accountId: 1,
+    payeeId: 1,
+    amount: 120.5,
+    reference: "STEG-APR2023",
+    description: "April Electricity Bill",
+    scheduledDate: "2023-04-15T00:00:00Z",
+    status: "completed",
+    createdAt: "2023-04-10T14:30:00Z",
+  },
+  {
+    id: 2,
+    userId: 2,
+    accountId: 1,
+    payeeId: 2,
+    amount: 45.75,
+    reference: "SONEDE-APR2023",
+    description: "April Water Bill",
+    scheduledDate: "2023-04-20T00:00:00Z",
+    status: "pending",
+    createdAt: "2023-04-10T15:45:00Z",
+  },
+  {
+    id: 3,
+    userId: 2,
+    accountId: 1,
+    payeeId: 3,
+    amount: 65.0,
+    reference: "OOREDOO-MAR2023",
+    description: "March Mobile Bill",
+    scheduledDate: "2023-03-25T00:00:00Z",
+    status: "completed",
+    createdAt: "2023-03-20T09:15:00Z",
+  },
+  {
+    id: 4,
+    userId: 2,
+    accountId: 1,
+    payeeId: 5,
+    amount: 210.3,
+    reference: "COMAR-Q1-2023",
+    description: "Q1 Insurance Premium",
+    scheduledDate: "2023-04-01T00:00:00Z",
+    status: "completed",
+    createdAt: "2023-03-25T11:20:00Z",
+  },
+  {
+    id: 5,
+    userId: 3,
+    accountId: 3,
+    payeeId: 6,
+    amount: 95.25,
+    reference: "STEG-APR2023",
+    description: "April Electricity Bill",
+    scheduledDate: "2023-04-18T00:00:00Z",
+    status: "pending",
+    createdAt: "2023-04-12T10:30:00Z",
+  },
+]
+

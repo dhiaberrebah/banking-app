@@ -1,329 +1,307 @@
+"use client"
+
 // src/pages/dashboard/transfer.tsx
-import React, { useState } from "react";
-import { Send, CreditCard, ArrowRight } from 'lucide-react';
-import { useAuth } from "../../contexts/auth-context";
-import { mockAccounts } from "../../data/mock-data";
+import React, { useState, type FormEvent } from "react"
+import { Send, AlertCircle } from "lucide-react"
+import { useAuth } from "../../contexts/auth-context"
+import { useNotifications } from "../../contexts/notification-context"
+import { mockAccounts } from "../../data/mock-data"
 
 const TransferPage: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuth()
+  const { addNotification } = useNotifications()
   const [formData, setFormData] = useState({
     fromAccount: "",
     toAccount: "",
     amount: "",
-    description: ""
-  });
-  const [step, setStep] = useState(1);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+    description: "",
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [transferSuccess, setTransferSuccess] = useState(false)
 
   // Get user accounts
-  const userAccounts = mockAccounts.filter(account => account.userId === currentUser?.id);
+  const userAccounts = mockAccounts.filter(
+    (account) => account.userId === currentUser?.id && account.status === "active",
+  )
+
+  // Set default from account if available
+  React.useEffect(() => {
+    if (userAccounts.length > 0 && !formData.fromAccount) {
+      setFormData((prev) => ({
+        ...prev,
+        fromAccount: userAccounts[0].id.toString(),
+      }))
+    }
+  }, [userAccounts])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+    const { name, value } = e.target
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }));
-  };
+      [name]: value,
+    }))
 
-  const handleNextStep = () => {
-    setError("");
-    
-    // Validate step 1
-    if (step === 1) {
-      if (!formData.fromAccount) {
-        setError("Please select a source account");
-        return;
-      }
-      if (!formData.toAccount) {
-        setError("Please enter a destination account");
-        return;
-      }
-      if (formData.fromAccount === formData.toAccount) {
-        setError("Source and destination accounts cannot be the same");
-        return;
+    // Clear error when field is edited
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
+    }
+  }
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!formData.fromAccount) {
+      newErrors.fromAccount = "Please select a source account"
+    }
+
+    if (!formData.toAccount) {
+      newErrors.toAccount = "Please enter a destination account"
+    }
+
+    if (!formData.amount) {
+      newErrors.amount = "Please enter an amount"
+    } else if (isNaN(Number(formData.amount)) || Number(formData.amount) <= 0) {
+      newErrors.amount = "Please enter a valid amount"
+    } else {
+      // Check if source account has sufficient funds
+      const sourceAccount = userAccounts.find((account) => account.id.toString() === formData.fromAccount)
+      if (sourceAccount && sourceAccount.balance < Number(formData.amount)) {
+        newErrors.amount = "Insufficient funds in the selected account"
       }
     }
-    
-    // Validate step 2
-    if (step === 2) {
-      if (!formData.amount || parseFloat(formData.amount) <= 0) {
-        setError("Please enter a valid amount");
-        return;
-      }
-      
-      const sourceAccount = userAccounts.find(account => account.id.toString() === formData.fromAccount);
-      if (sourceAccount && parseFloat(formData.amount) > sourceAccount.balance) {
-        setError("Insufficient funds");
-        return;
-      }
+
+    if (!formData.description) {
+      newErrors.description = "Please enter a description"
     }
-    
-    setStep(step + 1);
-  };
 
-  const handlePrevStep = () => {
-    setStep(step - 1);
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    
-    // In a real app, this would make an API call to process the transfer
-    // For now, we'll just simulate a successful transfer
-    setTimeout(() => {
-      setSuccess(true);
-    }, 1000);
-  };
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
 
-  const resetForm = () => {
-    setFormData({
-      fromAccount: "",
-      toAccount: "",
-      amount: "",
-      description: ""
-    });
-    setStep(1);
-    setSuccess(false);
-  };
+    if (validateForm()) {
+      setIsSubmitting(true)
 
-  const getSelectedAccount = () => {
-    return userAccounts.find(account => account.id.toString() === formData.fromAccount);
-  };
+      // Simulate API call
+      setTimeout(() => {
+        setIsSubmitting(false)
+        setTransferSuccess(true)
+
+        // Add notification for successful transfer
+        if (currentUser) {
+          const amount = Number(formData.amount).toLocaleString()
+          const sourceAccount = userAccounts.find((account) => account.id.toString() === formData.fromAccount)
+
+          addNotification({
+            userId: currentUser.id,
+            title: "Transfer Successful",
+            message: `Your transfer of ${amount} TND to account ${formData.toAccount} was successful.`,
+            type: "success",
+            link: "/dashboard/accounts",
+          })
+        }
+
+        // Reset form after 3 seconds
+        setTimeout(() => {
+          setTransferSuccess(false)
+          setFormData({
+            fromAccount: userAccounts.length > 0 ? userAccounts[0].id.toString() : "",
+            toAccount: "",
+            amount: "",
+            description: "",
+          })
+        }, 3000)
+      }, 1500)
+    }
+  }
+
+  // Get account details by ID
+  const getAccountDetails = (accountId: string) => {
+    return userAccounts.find((account) => account.id.toString() === accountId)
+  }
 
   return (
     <div>
       <h1 className="text-2xl font-semibold text-gray-900">Transfer Money</h1>
-      
-      {!success ? (
-        <div className="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="mb-8">
-              <div className="flex items-center">
-                <div className={`flex items-center justify-center h-12 w-12 rounded-full ${step >= 1 ? 'bg-blue-900' : 'bg-gray-200'}`}>
-                  <span className={`text-lg font-medium ${step >= 1 ? 'text-white' : 'text-gray-500'}`}>1</span>
+
+      <div className="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Make a Transfer</h2>
+
+          {transferSuccess ? (
+            <div className="bg-green-50 border-l-4 border-green-500 p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <Send className="h-5 w-5 text-green-400" />
                 </div>
-                <div className={`flex-1 h-1 mx-2 ${step >= 2 ? 'bg-blue-900' : 'bg-gray-200'}`}></div>
-                <div className={`flex items-center justify-center h-12 w-12 rounded-full ${step >= 2 ? 'bg-blue-900' : 'bg-gray-200'}`}>
-                  <span className={`text-lg font-medium ${step >= 2 ? 'text-white' : 'text-gray-500'}`}>2</span>
-                </div>
-                <div className={`flex-1 h-1 mx-2 ${step >= 3 ? 'bg-blue-900' : 'bg-gray-200'}`}></div>
-                <div className={`flex items-center justify-center h-12 w-12 rounded-full ${step >= 3 ? 'bg-blue-900' : 'bg-gray-200'}`}>
-                  <span className={`text-lg font-medium ${step >= 3 ? 'text-white' : 'text-gray-500'}`}>3</span>
-                </div>
-              </div>
-              <div className="flex justify-between mt-2">
-                <div className="text-center w-1/3">
-                  <p className="text-sm font-medium text-gray-900">Select Accounts</p>
-                </div>
-                <div className="text-center w-1/3">
-                  <p className="text-sm font-medium text-gray-900">Enter Amount</p>
-                </div>
-                <div className="text-center w-1/3">
-                  <p className="text-sm font-medium text-gray-900">Confirm Transfer</p>
+                <div className="ml-3">
+                  <p className="text-sm text-green-700">Transfer completed successfully! The funds have been sent.</p>
                 </div>
               </div>
             </div>
-            
-            {error && (
-              <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-4">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            )}
-            
+          ) : (
             <form onSubmit={handleSubmit}>
-              {/* Step 1: Select Accounts */}
-              {step === 1 && (
-                <div className="space-y-6">
-                  <div>
-                    <label htmlFor="fromAccount" className="block text-sm font-medium text-gray-700">
-                      From Account
-                    </label>
-                    <select
-                      id="fromAccount"
-                      name="fromAccount"
-                      value={formData.fromAccount}
-                      onChange={handleChange}
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-900 focus:border-blue-900 sm:text-sm rounded-md"
-                    >
-                      <option value="">Select an account</option>
-                      {userAccounts.map(account => (
-                        <option key={account.id} value={account.id}>
-                          {account.accountType} - {account.accountNumber} ({account.balance.toLocaleString()} {account.currency})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="toAccount" className="block text-sm font-medium text-gray-700">
-                      To Account (Account Number)
-                    </label>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="fromAccount" className="block text-sm font-medium text-gray-700">
+                    From Account
+                  </label>
+                  <select
+                    id="fromAccount"
+                    name="fromAccount"
+                    value={formData.fromAccount}
+                    onChange={handleChange}
+                    className={`mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-900 focus:border-blue-900 sm:text-sm rounded-md ${
+                      errors.fromAccount ? "border-red-300 ring-red-500" : ""
+                    }`}
+                  >
+                    <option value="">Select an account</option>
+                    {userAccounts.map((account) => (
+                      <option key={account.id} value={account.id}>
+                        {account.accountType} - {account.accountNumber.substring(0, 8)}... (
+                        {account.balance.toLocaleString()} {account.currency})
+                      </option>
+                    ))}
+                  </select>
+                  {errors.fromAccount && <p className="mt-1 text-sm text-red-600">{errors.fromAccount}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="toAccount" className="block text-sm font-medium text-gray-700">
+                    To Account (Account Number)
+                  </label>
+                  <input
+                    type="text"
+                    id="toAccount"
+                    name="toAccount"
+                    value={formData.toAccount}
+                    onChange={handleChange}
+                    placeholder="Enter account number"
+                    className={`mt-1 focus:ring-blue-900 focus:border-blue-900 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
+                      errors.toAccount ? "border-red-300 ring-red-500" : ""
+                    }`}
+                  />
+                  {errors.toAccount && <p className="mt-1 text-sm text-red-600">{errors.toAccount}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+                    Amount
+                  </label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">TND</span>
+                    </div>
                     <input
                       type="text"
-                      name="toAccount"
-                      id="toAccount"
-                      value={formData.toAccount}
+                      id="amount"
+                      name="amount"
+                      value={formData.amount}
                       onChange={handleChange}
-                      placeholder="Enter account number"
-                      className="mt-1 focus:ring-blue-900 focus:border-blue-900 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                      placeholder="0.00"
+                      className={`focus:ring-blue-900 focus:border-blue-900 block w-full pl-12 pr-12 sm:text-sm border-gray-300 rounded-md ${
+                        errors.amount ? "border-red-300 ring-red-500" : ""
+                      }`}
                     />
                   </div>
+                  {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount}</p>}
+
+                  {formData.fromAccount && (
+                    <p className="mt-1 text-sm text-gray-500">
+                      Available balance: {getAccountDetails(formData.fromAccount)?.balance.toLocaleString()} TND
+                    </p>
+                  )}
                 </div>
-              )}
-              
-              {/* Step 2: Enter Amount */}
-              {step === 2 && (
-                <div className="space-y-6">
-                  <div>
-                    <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                      Amount
-                    </label>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span className="text-gray-500 sm:text-sm">TND</span>
-                      </div>
-                      <input
-                        type="number"
-                        name="amount"
-                        id="amount"
-                        value={formData.amount}
-                        onChange={handleChange}
-                        className="focus:ring-blue-900 focus:border-blue-900 block w-full pl-12 pr-12 sm:text-sm border-gray-300 rounded-md"
-                        placeholder="0.00"
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    {getSelectedAccount() && (
-                      <p className="mt-2 text-sm text-gray-500">
-                        Available balance: {getSelectedAccount()?.balance.toLocaleString()} {getSelectedAccount()?.currency}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                      Description (Optional)
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      rows={3}
-                      value={formData.description}
-                      onChange={handleChange}
-                      className="shadow-sm focus:ring-blue-900 focus:border-blue-900 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                      placeholder="Add a note about this transfer"
-                    />
-                  </div>
+
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows={3}
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Enter transfer description"
+                    className={`mt-1 focus:ring-blue-900 focus:border-blue-900 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${
+                      errors.description ? "border-red-300 ring-red-500" : ""
+                    }`}
+                  />
+                  {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
                 </div>
-              )}
-              
-              {/* Step 3: Confirm Transfer */}
-              {step === 3 && (
-                <div className="space-y-6">
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Transfer Summary</h3>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">From Account</p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {getSelectedAccount()?.accountType} - {getSelectedAccount()?.accountNumber}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">To Account</p>
-                        <p className="mt-1 text-sm text-gray-900">{formData.toAccount}</p>
-                      </div>
-                      
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Amount</p>
-                        <p className="mt-1 text-sm text-gray-900">{parseFloat(formData.amount).toLocaleString()} TND</p>
-                      </div>
-                      
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Description</p>
-                        <p className="mt-1 text-sm text-gray-900">{formData.description || "N/A"}</p>
-                      </div>
-                    </div>
+              </div>
+
+              <div className="mt-6 bg-gray-50 p-4 rounded-md">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <AlertCircle className="h-5 w-5 text-blue-900" />
                   </div>
-                  
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm text-yellow-700">
-                          Please verify all details before confirming the transfer. This action cannot be undone.
-                        </p>
-                      </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-gray-900">Important Information</h3>
+                    <div className="mt-2 text-sm text-gray-500">
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Transfers between accounts are processed immediately.</li>
+                        <li>Transfers to other banks may take 1-2 business days.</li>
+                        <li>Daily transfer limit is 10,000 TND.</li>
+                      </ul>
                     </div>
                   </div>
                 </div>
-              )}
-              
-              <div className="mt-8 flex justify-between">
-                {step > 1 && (
-                  <button
-                    type="button"
-                    onClick={handlePrevStep}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900"
-                  >
-                    Back
-                  </button>
-                )}
-                
-                {step < 3 ? (
-                  <button
-                    type="button"
-                    onClick={handleNextStep}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900"
-                  >
-                    Continue
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900"
-                  >
-                    Confirm Transfer
-                  </button>
-                )}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900 disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-4 w-4" />
+                      Send Money
+                    </>
+                  )}
+                </button>
               </div>
             </form>
-          </div>
+          )}
         </div>
-      ) : (
-        <div className="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:p-6 text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-              <Send className="h-6 w-6 text-green-600" />
-            </div>
-            <h3 className="mt-2 text-lg font-medium text-gray-900">Transfer Successful!</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Your transfer of {parseFloat(formData.amount).toLocaleString()} TND has been processed successfully.
-            </p>
-            <div className="mt-6">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900"
-              >
-                Make Another Transfer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
-  );
-};
+  )
+}
 
-export default TransferPage;
+export default TransferPage
+

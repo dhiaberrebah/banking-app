@@ -1,24 +1,26 @@
+"use client"
+
 // src/pages/dashboard/overview.tsx
-import React from "react";
-import { Link } from "react-router-dom";
-import { CreditCard, Send, PiggyBank, ArrowRight, TrendingUp, TrendingDown } from 'lucide-react';
-import { useAuth } from "../../contexts/auth-context";
-import { mockAccounts, mockTransactions } from "../../data/mock-data";
+import type React from "react"
+import { Link } from "react-router-dom"
+import { CreditCard, Send, ArrowRight, TrendingUp, TrendingDown, FileText } from "lucide-react"
+import { useAuth } from "../../contexts/auth-context"
+import { mockAccounts, mockTransactions } from "../../data/mock-data"
 
 const DashboardOverview: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuth()
 
   // Get user accounts
-  const userAccounts = mockAccounts.filter((account) => account.userId === currentUser?.id);
+  const userAccounts = mockAccounts.filter((account) => account.userId === currentUser?.id)
 
   // Get total balance
-  const totalBalance = userAccounts.reduce((sum, account) => sum + account.balance, 0);
+  const totalBalance = userAccounts.reduce((sum, account) => sum + account.balance, 0)
 
   // Get recent transactions
   const recentTransactions = mockTransactions
     .filter((transaction) => userAccounts.some((account) => account.id === transaction.accountId))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
+    .slice(0, 5)
 
   return (
     <div>
@@ -90,13 +92,13 @@ const DashboardOverview: React.FC = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0 bg-blue-100 rounded-md p-3">
-                <PiggyBank className="h-6 w-6 text-blue-900" />
+                <FileText className="h-6 w-6 text-blue-900" />
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Loan Simulator</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Transaction History</dt>
                   <dd>
-                    <div className="text-lg font-medium text-gray-900">Calculate Payments</div>
+                    <div className="text-lg font-medium text-gray-900">View & Export</div>
                   </dd>
                 </dl>
               </div>
@@ -104,8 +106,11 @@ const DashboardOverview: React.FC = () => {
           </div>
           <div className="bg-gray-50 px-5 py-3">
             <div className="text-sm">
-              <Link to="/dashboard/loans" className="font-medium text-blue-900 hover:text-blue-800 flex items-center">
-                Simulate a loan
+              <Link
+                to="/dashboard/transactions"
+                className="font-medium text-blue-900 hover:text-blue-800 flex items-center"
+              >
+                View transactions
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
@@ -117,7 +122,7 @@ const DashboardOverview: React.FC = () => {
       <div className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium text-gray-900">Recent Transactions</h2>
-          <Link to="/dashboard/accounts" className="text-sm font-medium text-blue-900 hover:text-blue-800">
+          <Link to="/dashboard/transactions" className="text-sm font-medium text-blue-900 hover:text-blue-800">
             View all
           </Link>
         </div>
@@ -207,7 +212,8 @@ const DashboardOverview: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DashboardOverview;
+export default DashboardOverview
+

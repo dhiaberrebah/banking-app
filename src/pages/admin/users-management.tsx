@@ -1,30 +1,33 @@
-import React, { useState } from "react";
-import { Edit, Trash2, UserPlus, Search, Check, X } from 'lucide-react';
-import { mockSystemUsers } from "../../data/mock-data";
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { Edit, Trash2, UserPlus, Search, Check, X } from "lucide-react"
+import { mockSystemUsers } from "../../data/mock-data"
 
 // Définir un type pour l'utilisateur
 interface SystemUser {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  lastLogin: string | null;
-  password?: string;
+  id: number
+  name: string
+  email: string
+  role: string
+  status: string
+  lastLogin: string | null
+  password?: string
 }
 
 const UsersManagementPage: React.FC = () => {
-  const [users, setUsers] = useState<SystemUser[]>(mockSystemUsers);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [editingUser, setEditingUser] = useState<SystemUser | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [users, setUsers] = useState<SystemUser[]>(mockSystemUsers)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [editingUser, setEditingUser] = useState<SystemUser | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
     password: "",
     role: "user",
     status: "active",
-  });
+  })
 
   // Filter users based on search term
   const filteredUsers = users.filter(
@@ -32,61 +35,65 @@ const UsersManagementPage: React.FC = () => {
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.role.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  )
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+    setSearchTerm(e.target.value)
+  }
 
   const handleEdit = (user: SystemUser) => {
-    setEditingUser({ ...user });
-  };
+    setEditingUser({ ...user })
+  }
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setEditingUser((prev) => prev ? {
-      ...prev,
-      [name]: value,
-    } : null);
-  };
+    const { name, value } = e.target
+    setEditingUser((prev) =>
+      prev
+        ? {
+            ...prev,
+            [name]: value,
+          }
+        : null,
+    )
+  }
 
   const saveEdit = () => {
     if (editingUser) {
-      setUsers(users.map((user) => (user.id === editingUser.id ? editingUser : user)));
-      setEditingUser(null);
+      setUsers(users.map((user) => (user.id === editingUser.id ? editingUser : user)))
+      setEditingUser(null)
     }
-  };
+  }
 
   const cancelEdit = () => {
-    setEditingUser(null);
-  };
+    setEditingUser(null)
+  }
 
   const handleDelete = (userId: number) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter((user) => user.id !== userId));
+      setUsers(users.filter((user) => user.id !== userId))
     }
-  };
+  }
 
   const handleAddChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setNewUser((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
   const handleAddUser = () => {
-    const newId = Math.max(...users.map((user) => user.id)) + 1;
-    setUsers([...users, { ...newUser, id: newId, lastLogin: null }]);
+    const newId = Math.max(...users.map((user) => user.id)) + 1
+    setUsers([...users, { ...newUser, id: newId, lastLogin: null }])
     setNewUser({
       name: "",
       email: "",
       password: "",
       role: "user",
       status: "active",
-    });
-    setShowAddModal(false);
-  };
+    })
+    setShowAddModal(false)
+  }
 
   return (
     <div>
@@ -341,7 +348,8 @@ const UsersManagementPage: React.FC = () => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default UsersManagementPage;
+export default UsersManagementPage
+
