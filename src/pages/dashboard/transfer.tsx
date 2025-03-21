@@ -33,7 +33,8 @@ const TransferPage: React.FC = () => {
         fromAccount: userAccounts[0].id.toString(),
       }))
     }
-  }, [userAccounts])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userAccounts]) // We intentionally omit formData.fromAccount to prevent potential infinite loops
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -97,7 +98,7 @@ const TransferPage: React.FC = () => {
         // Add notification for successful transfer
         if (currentUser) {
           const amount = Number(formData.amount).toLocaleString()
-          const sourceAccount = userAccounts.find((account) => account.id.toString() === formData.fromAccount)
+          // Removed unused sourceAccount variable
 
           addNotification({
             userId: currentUser.id,

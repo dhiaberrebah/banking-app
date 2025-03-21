@@ -10,7 +10,7 @@ const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { currentUser, logout } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
+  // Removed unused location variable
 
   const handleLogout = () => {
     logout()

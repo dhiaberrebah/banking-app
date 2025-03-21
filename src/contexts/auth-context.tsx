@@ -33,6 +33,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, onAuthStat
         localStorage.removeItem("currentUser")
       }
     }
+    // We intentionally omit currentUser and onAuthStateChanged from dependencies
+    // to prevent infinite loops, as this effect should only run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Empty dependency array - only run on mount
 
   // Login function

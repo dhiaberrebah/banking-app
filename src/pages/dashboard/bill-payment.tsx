@@ -66,7 +66,8 @@ const BillPaymentPage: React.FC = () => {
         accountId: userAccounts[0].id.toString(),
       }))
     }
-  }, [userAccounts])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userAccounts]) // We intentionally omit paymentForm.accountId to prevent potential infinite loops
 
   // Handle payment form change
   const handlePaymentFormChange = (
