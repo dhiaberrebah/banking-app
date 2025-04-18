@@ -28,6 +28,10 @@ const loanSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected', 'active', 'closed'],
     default: 'pending'
   },
+  rejectionReason: {
+    type: String,
+    default: ''
+  },
   applicationDetails: {
     personal: {
       firstName: String,

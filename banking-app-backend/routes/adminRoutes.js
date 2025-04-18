@@ -13,7 +13,10 @@ import {
   getAllTransfers,
   updateTransferStatus,
   getAllBankAccounts,
-  getAccountById
+  getAccountById,
+  getAllLoanApplications,
+  getLoanById,
+  updateLoanStatus,
 } from '../controllers/adminController.js';
 
 const router = express.Router();
@@ -37,7 +40,17 @@ router.patch('/accounts/:id/status', protectedRoute, adminRoute, updateAccountSt
 // Transfer routes
 router.get('/getAllTransfers', protectedRoute, adminRoute, getAllTransfers);
 
+// Loan routes
+router.get('/loans', protectedRoute, adminRoute, getAllLoanApplications);
+router.get('/loans/:loanId', protectedRoute, adminRoute, getLoanById);
+router.patch('/loans/:loanId/status', protectedRoute, adminRoute, updateLoanStatus);
+
+// Dashboard statistics route
+router.get('/dashboard-stats',protectedRoute, adminRoute, getDashboardStats);
+
 export default router;
+
+
 
 
 

@@ -34,8 +34,8 @@ import UserManagement from "./pages/admin/userManagement"
 import Permissions from "./pages/admin/permission"
 import AccountRequests from "./pages/admin/accountReq"
 import LoanRequests from "./pages/admin/loanReq"
-import GeneralRequests from "./pages/admin/generalReq"
 import Monitoring from "./pages/admin/monitoring"
+import AdminProfile from "./pages/admin/monitoring"
 
 // Store
 import { useAuthStore } from  "../src/store/auth-store"
@@ -198,10 +198,9 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="permissions" element={<Permissions />} />
-          <Route path="monitoring" element={<Monitoring />} />
+          <Route path="profile" element={<AdminProfile />} />
           <Route path="requests/accounts" element={<AccountRequests />} />
           <Route path="requests/loans" element={<LoanRequests />} />
-          <Route path="requests/general" element={<GeneralRequests />} />
         </Route>
 
         {/* 404 page */}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Eye, Download, Loader2, FileText, Clock } from "lucide-react"
+import { Search, Eye, Download, Loader2, FileText, Clock, AlertCircle } from "lucide-react"
 import axios from "axios"
 
 type LoanApplication = {
@@ -14,6 +14,8 @@ type LoanApplication = {
   createdAt: string;
   documents?: string[];
   notes?: Array<{ date: string; text: string; }>;
+  rejectionReason?: string;
+
 }
 
 type LoanDetails = {
@@ -28,6 +30,7 @@ type LoanDetails = {
   notes: Array<{ date: string; text: string; }>;
   createdAt: string;
   updatedAt: string;
+  rejectionReason?: string;
 }
 
 type LoanStatusProps = {
@@ -112,6 +115,7 @@ export function LoanStatus({
       } else {
         setError(response.data.message || "Failed to fetch loan applications")
       }
+      console.log("Loan applications fetched:", response.data.loans)
     } catch (error) {
       console.error("Error fetching loan applications:", error)
       setError("An error occurred while fetching your loan applications")
@@ -136,10 +140,12 @@ export function LoanStatus({
           { date: loanDetails.createdAt, text: loanDetails.notes }
         ] : []
         
+        // Make sure we're capturing the rejection reason
         setSelectedApplication({
           ...loanDetails,
           documents: loanDetails.documents || [],
-          notes: notesArray
+          notes: notesArray,
+          rejectionReason: loanDetails.rejectionReason || null
         })
         setShowDetails(true)
       } else {
@@ -153,7 +159,20 @@ export function LoanStatus({
   }
 
   const viewApplication = (application: LoanApplication) => {
-    fetchLoanDetails(application.id)
+    if (application.status.toLowerCase() === "rejected") {
+      // For rejected loans, directly set the selected application with the rejection reason
+      setSelectedApplication({
+        ...application,
+        documents: application.documents || [],
+        notes: application.notes || [],
+        updatedAt: application.createdAt, // Use createdAt as updatedAt if not available
+        rejectionReason: application.rejectionReason || "No specific reason provided."
+      });
+      setShowDetails(true);
+    } else {
+      // For non-rejected loans, fetch additional details
+      fetchLoanDetails(application.id);
+    }
   }
 
   const filteredApplications = loanApplications.filter(
@@ -259,166 +278,253 @@ export function LoanStatus({
                 </div>
               ) : (
                 <>
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-800">Loan Application Details</h2>
-                        <p className="text-sm text-gray-600 mt-1">Complete information about this loan application</p>
+                  {selectedApplication.status.toLowerCase() === "rejected" ? (
+                    // Rejection-only modal
+                    <div>
+                      <div className="bg-gradient-to-r from-red-50 to-red-100 p-6 border-b border-gray-200">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-800">Loan Application Rejected</h2>
+                            <p className="text-sm text-gray-600 mt-1">Your loan application has been declined</p>
+                          </div>
+                          <span className={`badge ${getStatusColor(selectedApplication.status)} px-4 py-2 rounded-full text-sm font-medium`}>
+                            {selectedApplication.status}
+                          </span>
+                        </div>
                       </div>
-                      <span className={`badge ${getStatusColor(selectedApplication.status)} px-4 py-2 rounded-full text-sm font-medium`}>
-                        {selectedApplication.status}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="tabs">
-                      <div className="tabs-list flex space-x-2 border-b border-gray-200 mb-6">
-                        <button
-                          className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-all duration-200 ${
-                            activeTab === "details" 
-                              ? "text-blue-600 border-b-2 border-blue-500" 
-                              : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                          }`}
-                          onClick={() => setActiveTab("details")}
-                        >
-                          Application Details
-                        </button>
-                        <button
-                          className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-all duration-200 ${
-                            activeTab === "documents" 
-                              ? "text-blue-600 border-b-2 border-blue-500" 
-                              : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                          }`}
-                          onClick={() => setActiveTab("documents")}
-                        >
-                          Documents
-                        </button>
-                        <button
-                          className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-all duration-200 ${
-                            activeTab === "timeline" 
-                              ? "text-blue-600 border-b-2 border-blue-500" 
-                              : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                          }`}
-                          onClick={() => setActiveTab("timeline")}
-                        >
-                          Timeline
-                        </button>
-                      </div>
-                      <div className="tabs-content py-2">
-                        {activeTab === "details" && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                              <h3 className="text-sm font-medium text-gray-500 mb-3">Loan Information</h3>
-                              <div className="space-y-3">
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Application ID:</span>
-                                  <span className="font-medium text-gray-900">{selectedApplication.id}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Loan Type:</span>
-                                  <span className="font-medium text-gray-900">{selectedApplication.loanType}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Amount:</span>
-                                  <span className="font-medium text-gray-900">{selectedApplication.amount.toLocaleString()} TND</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Term:</span>
-                                  <span className="font-medium text-gray-900">{selectedApplication.term} years</span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                              <h3 className="text-sm font-medium text-gray-500 mb-3">Financial Details</h3>
-                              <div className="space-y-3">
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Interest Rate:</span>
-                                  <span className="font-medium text-gray-900">{selectedApplication.interestRate}%</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Monthly Payment:</span>
-                                  <span className="font-medium text-gray-900">
-                                    {((selectedApplication.amount * (selectedApplication.interestRate/100/12) * 
-                                    Math.pow(1 + (selectedApplication.interestRate/100/12), selectedApplication.term*12)) / 
-                                    (Math.pow(1 + (selectedApplication.interestRate/100/12), selectedApplication.term*12) - 1)).toFixed(2)} TND
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Application Date:</span>
-                                  <span className="font-medium text-gray-900">{formatDate(selectedApplication.createdAt)}</span>
-                                </div>
-                              </div>
+                      
+                      <div className="p-6">
+                        <div className="bg-red-50 p-5 rounded-lg border border-red-100 mb-6">
+                          <div className="flex items-start">
+                            <AlertCircle className="h-6 w-6 text-red-600 mr-3 mt-0.5" />
+                            <div>
+                              <h3 className="text-base font-medium text-red-800 mb-2">Reason for Rejection</h3>
+                              <p className="text-red-700">
+                                {selectedApplication.rejectionReason ? 
+                                  selectedApplication.rejectionReason : 
+                                  "No specific reason provided."}
+                              </p>
                             </div>
                           </div>
-                        )}
-                        {activeTab === "documents" && (
-                          <div className="space-y-4">
-                            {selectedApplication.documents && selectedApplication.documents.length > 0 ? (
-                              selectedApplication.documents.map((doc, index) => (
-                                <div key={index} className="flex items-center justify-between rounded-md border p-4 hover:bg-gray-50 transition-colors">
-                                  <div className="flex items-center">
-                                    <div className="bg-blue-100 p-2 rounded-md mr-3">
-                                      <FileText className="h-5 w-5 text-blue-600" />
+                        </div>
+                        
+                        <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                          <h3 className="text-base font-medium text-gray-800 mb-3">Loan Application Summary</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-sm text-gray-500">Application ID</p>
+                              <p className="font-medium">{selectedApplication.id}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Loan Type</p>
+                              <p className="font-medium">{selectedApplication.loanType}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Amount</p>
+                              <p className="font-medium">{selectedApplication.amount.toLocaleString()} TND</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Term</p>
+                              <p className="font-medium">{selectedApplication.term} years</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Application Date</p>
+                              <p className="font-medium">{formatDateFn(selectedApplication.createdAt)}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-6 text-center">
+                          <p className="text-gray-600 mb-4">If you have any questions about this decision, please contact our customer support.</p>
+                          <button 
+                            className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
+                            onClick={handleCloseDetails}
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Original modal for non-rejected applications
+                    <>
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-800">Loan Application Details</h2>
+                            <p className="text-sm text-gray-600 mt-1">Complete information about this loan application</p>
+                          </div>
+                          <span className={`badge ${getStatusColor(selectedApplication.status)} px-4 py-2 rounded-full text-sm font-medium`}>
+                            {selectedApplication.status}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <div className="tabs">
+                          <div className="tabs-list flex space-x-2 border-b border-gray-200 mb-6">
+                            <button
+                              className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-all duration-200 ${
+                                activeTab === "details" 
+                                  ? "text-blue-600 border-b-2 border-blue-500" 
+                                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                              }`}
+                              onClick={() => setActiveTab("details")}
+                            >
+                              Application Details
+                            </button>
+                            <button
+                              className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-all duration-200 ${
+                                activeTab === "documents" 
+                                  ? "text-blue-600 border-b-2 border-blue-500" 
+                                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                              }`}
+                              onClick={() => setActiveTab("documents")}
+                            >
+                              Documents
+                            </button>
+                            <button
+                              className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-all duration-200 ${
+                                activeTab === "timeline" 
+                                  ? "text-blue-600 border-b-2 border-blue-500" 
+                                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                              }`}
+                              onClick={() => setActiveTab("timeline")}
+                            >
+                              Timeline
+                            </button>
+                          </div>
+                          <div className="tabs-content py-2">
+                            {activeTab === "details" && (
+                              <div className="space-y-6">
+                                {/* Add rejection reason at the top when loan is rejected */}
+                                {selectedApplication.status.toLowerCase() === "rejected" && selectedApplication.rejectionReason && (
+                                  <div className="bg-red-50 p-4 rounded-lg border border-red-100 mb-4">
+                                    <div className="flex items-start">
+                                      <AlertCircle className="h-5 w-5 text-red-600 mr-2 mt-0.5" />
+                                      <div>
+                                        <h3 className="text-sm font-medium text-red-800">Application Rejected</h3>
+                                        <p className="text-sm text-red-700 mt-1">{selectedApplication.rejectionReason}</p>
+                                      </div>
                                     </div>
-                                    <span className="font-medium text-gray-700">{doc}</span>
                                   </div>
-                                  <button className="btn btn-outline btn-sm flex items-center text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-md border border-blue-200">
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Download
-                                  </button>
+                                )}
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div className="bg-gray-50 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-gray-500 mb-3">Loan Information</h3>
+                                    <div className="space-y-3">
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Application ID:</span>
+                                        <span className="font-medium text-gray-900">{selectedApplication.id}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Loan Type:</span>
+                                        <span className="font-medium text-gray-900">{selectedApplication.loanType}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Amount:</span>
+                                        <span className="font-medium text-gray-900">{selectedApplication.amount.toLocaleString()} TND</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Term:</span>
+                                        <span className="font-medium text-gray-900">{selectedApplication.term} years</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="bg-gray-50 p-4 rounded-lg">
+                                    <h3 className="text-sm font-medium text-gray-500 mb-3">Financial Details</h3>
+                                    <div className="space-y-3">
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Interest Rate:</span>
+                                        <span className="font-medium text-gray-900">{selectedApplication.interestRate}%</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Monthly Payment:</span>
+                                        <span className="font-medium text-gray-900">
+                                          {((selectedApplication.amount * (selectedApplication.interestRate/100/12) * 
+                                          Math.pow(1 + (selectedApplication.interestRate/100/12), selectedApplication.term*12)) / 
+                                          (Math.pow(1 + (selectedApplication.interestRate/100/12), selectedApplication.term*12) - 1)).toFixed(2)} TND
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Application Date:</span>
+                                        <span className="font-medium text-gray-900">{formatDate(selectedApplication.createdAt)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
-                              ))
-                            ) : (
-                              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                <div className="mx-auto w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mb-3">
-                                  <FileText className="h-6 w-6 text-gray-400" />
-                                </div>
-                                <p className="text-gray-500 font-medium">No documents available</p>
-                                <p className="text-gray-400 text-sm mt-1">Documents related to your application will appear here</p>
+                              </div>
+                            )}
+                            {activeTab === "documents" && (
+                              <div className="space-y-4">
+                                {selectedApplication.documents && selectedApplication.documents.length > 0 ? (
+                                  selectedApplication.documents.map((doc, index) => (
+                                    <div key={index} className="flex items-center justify-between rounded-md border p-4 hover:bg-gray-50 transition-colors">
+                                      <div className="flex items-center">
+                                        <div className="bg-blue-100 p-2 rounded-md mr-3">
+                                          <FileText className="h-5 w-5 text-blue-600" />
+                                        </div>
+                                        <span className="font-medium text-gray-700">{doc}</span>
+                                      </div>
+                                      <button className="btn btn-outline btn-sm flex items-center text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-md border border-blue-200">
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Download
+                                      </button>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                    <div className="mx-auto w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mb-3">
+                                      <FileText className="h-6 w-6 text-gray-400" />
+                                    </div>
+                                    <p className="text-gray-500 font-medium">No documents available</p>
+                                    <p className="text-gray-400 text-sm mt-1">Documents related to your application will appear here</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {activeTab === "timeline" && (
+                              <div className="space-y-4 relative">
+                                {selectedApplication.notes && selectedApplication.notes.length > 0 ? (
+                                  <>
+                                    <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                                    {selectedApplication.notes.map((note: { date: string; text: string }, index: number) => (
+                                      <div
+                                        key={index}
+                                        className="relative pl-8 pb-5"
+                                      >
+                                        <div className="absolute left-0 top-1.5 h-4 w-4 rounded-full bg-blue-500 border-2 border-white shadow-sm z-10"></div>
+                                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                          <div className="text-sm font-medium text-blue-600 mb-1">{formatDate(note.date)}</div>
+                                          <div className="text-gray-700">{note.text}</div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </>
+                                ) : (
+                                  <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                    <div className="mx-auto w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mb-3">
+                                      <Clock className="h-6 w-6 text-gray-400" />
+                                    </div>
+                                    <p className="text-gray-500 font-medium">No timeline events available</p>
+                                    <p className="text-gray-400 text-sm mt-1">Updates about your application will appear here</p>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
-                        )}
-                        {activeTab === "timeline" && (
-                          <div className="space-y-4 relative">
-                            {selectedApplication.notes && selectedApplication.notes.length > 0 ? (
-                              <>
-                                <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                                {selectedApplication.notes.map((note: { date: string; text: string }, index: number) => (
-                                  <div
-                                    key={index}
-                                    className="relative pl-8 pb-5"
-                                  >
-                                    <div className="absolute left-0 top-1.5 h-4 w-4 rounded-full bg-blue-500 border-2 border-white shadow-sm z-10"></div>
-                                    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                                      <div className="text-sm font-medium text-blue-600 mb-1">{formatDate(note.date)}</div>
-                                      <div className="text-gray-700">{note.text}</div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </>
-                            ) : (
-                              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                <div className="mx-auto w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mb-3">
-                                  <Clock className="h-6 w-6 text-gray-400" />
-                                </div>
-                                <p className="text-gray-500 font-medium">No timeline events available</p>
-                                <p className="text-gray-400 text-sm mt-1">Updates about your application will appear here</p>
-                              </div>
-                            )}
+                          <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+                            <button 
+                              className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
+                              onClick={handleCloseDetails}
+                            >
+                              Close
+                            </button>
                           </div>
-                        )}
+                        </div>
                       </div>
-                      <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
-                        <button 
-                          className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
-                          onClick={handleCloseDetails}
-                        >
-                          Close
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </>
               )}
             </div>

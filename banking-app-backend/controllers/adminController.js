@@ -317,27 +317,113 @@ export const getUserById = async (req, res) => {
 };
 
 
-// Get dashboard statistics
+// Get dashboard statistics with timeframe filtering
 export const getDashboardStats = async (req, res) => {
   try {
-    // Get total users count
+    const { timeframe = 'today' } = req.query;
+    
+    // Define date filters based on timeframe
+    const dateFilter = {};
+    const now = new Date();
+    
+    if (timeframe === 'today') {
+      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+      dateFilter.createdAt = { $gte: startOfDay };
+    } else if (timeframe === 'yesterday') {
+      const startOfYesterday = new Date(now);
+      startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+      startOfYesterday.setHours(0, 0, 0, 0);
+      
+      const endOfYesterday = new Date(now);
+      endOfYesterday.setDate(endOfYesterday.getDate() - 1);
+      endOfYesterday.setHours(23, 59, 59, 999);
+      
+      dateFilter.createdAt = { 
+        $gte: startOfYesterday,
+        $lte: endOfYesterday
+      };
+    } else if (timeframe === 'week') {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(startOfWeek.getDate() - 7);
+      dateFilter.createdAt = { $gte: startOfWeek };
+    } else if (timeframe === 'month') {
+      const startOfMonth = new Date(now);
+      startOfMonth.setDate(startOfMonth.getDate() - 30);
+      dateFilter.createdAt = { $gte: startOfMonth };
+    }
+    
+    // Import models
+    const User = await import('../models/UserModel.js').then(module => module.default);
+    const Account = await import('../models/AccountModel.js').then(module => module.default);
+    const Transfer = await import('../models/TransferModel.js').then(module => module.default);
+    const Loan = await import('../models/LoanModel.js').then(module => module.default);
+    
+    // Get user statistics
     const totalUsers = await User.countDocuments({});
+    const newUsers = await User.countDocuments(dateFilter);
+    
+    // Get all accounts
+    const allAccounts = await Account.find({}).populate('userId', 'firstName lastName email');
+    
+    // Format accounts for frontend
+    const formattedAccounts = allAccounts.map(account => ({
+      id: account._id,
+      accountNumber: account.accountNumber,
+      accountType: account.accountType,
+      status: account.status,
+      balance: account.balance,
+      currency: account.currency,
+      createdAt: account.createdAt,
+      user: account.userId ? {
+        id: account.userId._id,
+        name: `${account.userId.firstName} ${account.userId.lastName}`,
+        email: account.userId.email
+      } : null
+    }));
     
     // Get accounts statistics
-    const totalAccounts = await Account.countDocuments({});
-    const pendingAccounts = await Account.countDocuments({ status: 'pending' });
-    const activeAccounts = await Account.countDocuments({ status: 'approved' });
+    const accountsQuery = dateFilter.createdAt ? { ...dateFilter } : {};
+    const totalAccounts = allAccounts.length;
+    const pendingAccounts = allAccounts.filter(acc => acc.status === 'pending').length;
+    const activeAccounts = allAccounts.filter(acc => acc.status === 'active').length;
     
     // Get accounts by type
-    const savingsAccounts = await Account.countDocuments({ accountType: 'savings' });
-    const checkingAccounts = await Account.countDocuments({ accountType: 'checking' });
-    const businessAccounts = await Account.countDocuments({ accountType: 'business' });
+    const savingsAccounts = allAccounts.filter(acc => acc.accountType === 'savings').length;
+    const checkingAccounts = allAccounts.filter(acc => acc.accountType === 'checking').length;
+    const businessAccounts = allAccounts.filter(acc => acc.accountType === 'business').length;
+    
+    // Get transaction statistics
+    const transactionQuery = dateFilter.createdAt ? { ...dateFilter } : {};
+    const totalTransactions = await Transfer.countDocuments({});
+    const todayTransactions = await Transfer.countDocuments({ 
+      createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } 
+    });
+    
+    // Calculate transaction volume by type
+    const depositTransactions = await Transfer.countDocuments({ type: 'deposit', ...transactionQuery });
+    const withdrawalTransactions = await Transfer.countDocuments({ type: 'withdrawal', ...transactionQuery });
+    const transferTransactions = await Transfer.countDocuments({ type: 'transfer', ...transactionQuery });
+    
+    // Get loan statistics
+    const totalLoans = await Loan.countDocuments({});
+    const approvedLoans = await Loan.countDocuments({ status: 'approved' });
+    const pendingLoans = await Loan.countDocuments({ status: 'pending' });
+    const rejectedLoans = await Loan.countDocuments({ status: 'rejected' });
+    
+    // Calculate total loan amount
+    const loanAmountPipeline = [
+      { $match: { status: 'approved' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ];
+    const loanAmountResult = await Loan.aggregate(loanAmountPipeline);
+    const totalLoanAmount = loanAmountResult.length > 0 ? loanAmountResult[0].total : 0;
     
     return res.status(200).json({
       success: true,
       stats: {
         users: {
-          total: totalUsers
+          total: totalUsers,
+          new: newUsers
         },
         accounts: {
           total: totalAccounts,
@@ -347,9 +433,27 @@ export const getDashboardStats = async (req, res) => {
             savings: savingsAccounts,
             checking: checkingAccounts,
             business: businessAccounts
+          },
+          allAccounts: formattedAccounts
+        },
+        transactions: {
+          total: totalTransactions,
+          today: todayTransactions,
+          byType: {
+            deposits: depositTransactions,
+            withdrawals: withdrawalTransactions,
+            transfers: transferTransactions
           }
+        },
+        loans: {
+          total: totalLoans,
+          approved: approvedLoans,
+          pending: pendingLoans,
+          rejected: rejectedLoans,
+          totalAmount: totalLoanAmount
         }
-      }
+      },
+      timeframe
     });
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
@@ -1060,6 +1164,7 @@ export const getAccountById = async (req, res) => {
     });
   }
 };
+
 
 
 

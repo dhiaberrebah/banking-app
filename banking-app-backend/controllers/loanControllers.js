@@ -4,6 +4,7 @@ import { sendEmail } from '../utils/Email.js';
 import cloudinary from '../utils/Cloudinary.js';
 import fs from 'fs';
 import { createNotification } from './notificationController.js';
+import { rejects } from 'assert';
 
 // Create a new loan application
 export const createLoanApplication = async (req, res) => {
@@ -162,7 +163,8 @@ export const getUserLoans = async (req, res) => {
         term: loan.term,
         interestRate: loan.interestRate,
         status: loan.status,
-        createdAt: loan.createdAt
+        createdAt: loan.createdAt,
+        rejectionReason: loan.rejectionReason
       }))
     });
   } catch (error) {
@@ -215,4 +217,101 @@ export const getLoanById = async (req, res) => {
     });
   }
 };
+
+// Update loan status (for admin use)
+export const updateLoanStatus = async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const { status, rejectionReason } = req.body;
+    
+    // Validate input
+    if (!['approved', 'rejected', 'pending'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status value'
+      });
+    }
+    
+    // If rejecting, require a reason
+    if (status === 'rejected' && !rejectionReason) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rejection reason is required'
+      });
+    }
+    
+    const loan = await Loan.findById(loanId);
+    
+    if (!loan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Loan not found'
+      });
+    }
+    
+    // Update loan status
+    loan.status = status;
+    
+    // Add rejection reason if provided
+    if (status === 'rejected') {
+      loan.rejectionReason = rejectionReason;
+    }
+    
+    // Add approval date if approved
+    if (status === 'approved') {
+      loan.approvalDate = new Date();
+    }
+    
+    await loan.save();
+    
+    // Notify user about status change
+    const user = await User.findById(loan.userId);
+    if (user && user.email) {
+      await sendEmail({
+        to: user.email,
+        subject: `Loan Application ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+        html: `
+          <h1>Loan Application Update</h1>
+          <p>Dear ${user.firstName || 'Valued Customer'},</p>
+          ${status === 'approved' 
+            ? `<p>We are pleased to inform you that your application for a ${loan.loanType} loan of ${loan.amount} TND has been approved.</p>
+               <p>Our team will contact you shortly with further details.</p>`
+            : `<p>We regret to inform you that your application for a ${loan.loanType} loan has been rejected.</p>
+               <p>Reason: ${rejectionReason}</p>
+               <p>If you have any questions, please contact our customer support.</p>`
+          }
+        `
+      });
+      
+      // Create notification
+      await createNotification({
+        userId: loan.userId,
+        title: `Loan ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+        message: status === 'approved' 
+          ? `Your loan application has been approved!` 
+          : `Your loan application was rejected. Reason: ${rejectionReason}`,
+        type: 'loan',
+        relatedItemId: loan._id
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: `Loan status updated to ${status}`,
+      loan: {
+        id: loan._id,
+        status: loan.status,
+        rejectionReason: loan.rejectionReason
+      }
+    });
+  } catch (error) {
+    console.error('Update loan status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update loan status',
+      error: error.message
+    });
+  }
+};
+
 

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { NavLink } from "react-router-dom"
-import { LayoutDashboard, Users, Activity, Shield, FileText, CreditCard, Calculator, Menu, X, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, User, History, CreditCard, Calculator, Menu, X, LogOut } from "lucide-react"
 
 const AdminSidebar = () => {
   const [expanded, setExpanded] = useState(true)
@@ -17,13 +17,13 @@ const AdminSidebar = () => {
       path: "/admin/users",
     },
     {
-      title: "Monitoring",
-      icon: Activity,
-      path: "/admin/monitoring",
+      title: "Admin Profile",
+      icon: User,
+      path: "/admin/profile",
     },
     {
-      title: "Permissions",
-      icon: Shield,
+      title: "Transaction History",
+      icon: History,
       path: "/admin/permissions",
     },
     {
@@ -35,11 +35,6 @@ const AdminSidebar = () => {
       title: "Loan Requests",
       icon: Calculator,
       path: "/admin/requests/loans",
-    },
-    {
-      title: "General Requests",
-      icon: FileText,
-      path: "/admin/requests/general",
     },
   ]
 

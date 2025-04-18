@@ -14,58 +14,16 @@ import {
   DollarSign,
   Calendar,
   Loader2,
-  X,
   Download,
+  User,
+  FileCheck,
+  AlertCircle,
+  Printer,
+  BarChart4,
 } from "lucide-react"
 import axios from "axios"
 import { toast } from "react-hot-toast"
-
-// Simple Custom Modal Component
-interface CustomModalProps {
-  isOpen: boolean
-  onClose: () => void
-  title: string
-  children: React.ReactNode
-  className?: string
-}
-
-const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, title, children, className = "" }) => {
-  if (!isOpen) return null
-
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={onClose}></div>
-        </div>
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
-          &#8203;
-        </span>
-        <div
-          className={`inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full ${className}`}
-        >
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="sm:flex sm:items-start">
-              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">{title}</h3>
-                  <button
-                    onClick={onClose}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                    aria-label="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-                {children}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+import CustomModal from "../../components/ui/customModal"
 
 interface LoanApplicant {
   id: string
@@ -82,40 +40,16 @@ interface LoanRequest {
   status: string
   submittedDate: string
   applicant: LoanApplicant
-  purpose?: string
-  currency?: string
   interestRate?: number
+  currency?: string
   monthlyPayment?: number
-  documents?: string[] | {
-    idDocument?: string
-    proofOfIncome?: string
-    bankStatements?: string
-  }
+  purpose?: string
+  documents?: string[]
   rejectionReason?: string
   approvalDate?: string
   notes?: string
-  applicationDetails?: {
-    personal?: {
-      firstName?: string
-      lastName?: string
-      email?: string
-      phone?: string
-      address?: string
-      city?: string
-      postalCode?: string
-    }
-    employment?: {
-      status?: string
-      employerName?: string
-      monthlyIncome?: number
-      otherLoans?: boolean
-      otherLoansAmount?: number
-    }
-    purpose?: string
-    additionalInfo?: string
-  }
-  createdAt?: string
-  updatedAt?: string
+  applicationDetails?: any
+  createdAt?: string // Added this property to fix the error
 }
 
 const LoanRequests = (): React.ReactElement => {
@@ -140,7 +74,7 @@ const LoanRequests = (): React.ReactElement => {
   const [selectedLoan, setSelectedLoan] = useState<LoanRequest | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Add these state variables at the top of your component
+  // Add these state variables for document viewing
   const [viewingDocument, setViewingDocument] = useState<string | null>(null)
   const [documentModalOpen, setDocumentModalOpen] = useState(false)
 
@@ -159,6 +93,7 @@ const LoanRequests = (): React.ReactElement => {
 
     setIsProcessing(true)
     try {
+      // Update this URL to match your actual backend API endpoint
       const response = await axios.patch(
         `http://localhost:5001/api/admin/loans/${selectedLoan?.id}/status`,
         {
@@ -170,14 +105,21 @@ const LoanRequests = (): React.ReactElement => {
 
       if (response.data.success) {
         toast.success("Loan application rejected successfully")
-        // Update the loan in the list
-        setLoanRequests((prevLoans) =>
-          prevLoans.map((loan) => (loan.id === selectedLoan?.id ? { ...loan, status: "rejected" } : loan)),
+
+        // Update the loan list with new status
+        setLoanRequests((prevRequests) =>
+          prevRequests.map((req) => (req.id === selectedLoan?.id ? { ...req, status: "rejected" } : req)),
         )
+
+        // Update filtered requests as well
+        setFilteredRequests((prevRequests) =>
+          prevRequests.map((req) => (req.id === selectedLoan?.id ? { ...req, status: "rejected" } : req)),
+        )
+
+        // Close modal and reset form
         setShowRejectionModal(false)
         setRejectionReason("")
-      } else {
-        toast.error(response.data.message || "Failed to reject loan")
+        setSelectedLoan(null)
       }
     } catch (error) {
       console.error("Error rejecting loan:", error)
@@ -194,42 +136,30 @@ const LoanRequests = (): React.ReactElement => {
       setError(null)
 
       try {
+        // Use the new admin endpoint
         const response = await axios.get("http://localhost:5001/api/admin/loans", {
           withCredentials: true,
         })
 
         if (response.data.success) {
+          console.log("Loan data received:", response.data)
+
           // Map the backend data to match our frontend interface
           const formattedLoans = response.data.loans.map((loan: any) => ({
-            id: loan._id || loan.id,
+            id: loan.id || loan._id,
             loanType: loan.loanType,
             amount: loan.amount,
             term: loan.term,
             status: loan.status,
-            submittedDate: loan.createdAt,
-            interestRate: loan.interestRate,
-            currency: loan.currency || "TND",
-            monthlyPayment: loan.monthlyPayment,
-            purpose: loan.applicationDetails?.purpose || loan.purpose,
-            documents: loan.documents,
-            rejectionReason: loan.rejectionReason,
-            approvalDate: loan.approvalDate,
-            notes: loan.notes,
-            applicationDetails: loan.applicationDetails,
-            createdAt: loan.createdAt,
-            updatedAt: loan.updatedAt,
+            submittedDate: loan.submittedDate || loan.createdAt,
             applicant: {
-              id: loan.userId?._id || loan.userId,
-              name: loan.userId ? 
-                `${loan.userId.firstName || ''} ${loan.userId.lastName || ''}` : 
-                (loan.applicationDetails?.personal ? 
-                  `${loan.applicationDetails.personal.firstName || ''} ${loan.applicationDetails.personal.lastName || ''}` : 
-                  'Unknown'),
-              email: loan.userId?.email || loan.applicationDetails?.personal?.email || '',
-              phone: loan.userId?.phoneNumber || loan.applicationDetails?.personal?.phone || '',
-            }
+              id: loan.applicant?.id || "",
+              name: loan.applicant?.name || "Unknown",
+              email: loan.applicant?.email || "",
+              phone: loan.applicant?.phone || "",
+            },
           }))
-          
+
           setLoanRequests(formattedLoans)
           setFilteredRequests(formattedLoans)
         } else {
@@ -237,7 +167,7 @@ const LoanRequests = (): React.ReactElement => {
         }
       } catch (error) {
         console.error("Error fetching loan requests:", error)
-        setError("An error occurred while fetching loan requests")
+        setError("Failed to fetch loan requests. Please check the server connection.")
       } finally {
         setIsLoading(false)
       }
@@ -304,31 +234,36 @@ const LoanRequests = (): React.ReactElement => {
               phone: "",
               address: "",
               city: "",
-              postalCode: ""
+              postalCode: "",
             },
             employment: {
               status: "",
               employerName: "",
               monthlyIncome: 0,
               otherLoans: false,
-              otherLoansAmount: 0
+              otherLoansAmount: 0,
             },
             purpose: "",
-            additionalInfo: ""
+            additionalInfo: "",
           },
-          createdAt: loanData.createdAt || new Date().toISOString(),
-          updatedAt: loanData.updatedAt || new Date().toISOString(),
           applicant: {
             id: loanData.applicant?.id || loanData.userId?._id || loanData.userId || "",
-            name: loanData.applicant?.name || 
-              (loanData.userId ? 
-                `${loanData.userId.firstName || ''} ${loanData.userId.lastName || ''}`.trim() || 'Unknown' : 
-                (loanData.applicationDetails?.personal ? 
-                  `${loanData.applicationDetails.personal.firstName || ''} ${loanData.applicationDetails.personal.lastName || ''}`.trim() || 'Unknown' : 
-                  'Unknown')),
-            email: loanData.applicant?.email || loanData.userId?.email || loanData.applicationDetails?.personal?.email || "",
-            phone: loanData.applicant?.phone || loanData.userId?.phoneNumber || loanData.applicationDetails?.personal?.phone || "",
-          }
+            name:
+              loanData.applicant?.name ||
+              (loanData.userId
+                ? `${loanData.userId.firstName || ""} ${loanData.userId.lastName || ""}`.trim() || "Unknown"
+                : loanData.applicationDetails?.personal
+                  ? `${loanData.applicationDetails.personal.firstName || ""} ${loanData.applicationDetails.personal.lastName || ""}`.trim() ||
+                    "Unknown"
+                  : "Unknown"),
+            email:
+              loanData.applicant?.email || loanData.userId?.email || loanData.applicationDetails?.personal?.email || "",
+            phone:
+              loanData.applicant?.phone ||
+              loanData.userId?.phoneNumber ||
+              loanData.applicationDetails?.personal?.phone ||
+              "",
+          },
         }
 
         setSelectedRequest(formattedLoan)
@@ -346,18 +281,6 @@ const LoanRequests = (): React.ReactElement => {
 
   // Update loan status
   const updateLoanStatus = async (loanId: string, status: "approved" | "rejected") => {
-    if (!loanId) {
-      toast.error("No loan ID provided for update")
-      return
-    }
-
-    // For rejection, we need to prompt for a reason
-    if (status === "rejected") {
-      setSelectedRequest((prevRequest) => (prevRequest ? { ...prevRequest, id: loanId } : null))
-      setShowRejectionReasonInput(true)
-      return
-    }
-
     setIsUpdatingStatus(true)
     try {
       const payload = {
@@ -365,6 +288,7 @@ const LoanRequests = (): React.ReactElement => {
         rejectionReason: "",
       }
 
+      // Update this URL to match your actual backend API endpoint
       const response = await axios.patch(`http://localhost:5001/api/admin/loans/${loanId}/status`, payload, {
         withCredentials: true,
       })
@@ -386,12 +310,7 @@ const LoanRequests = (): React.ReactElement => {
       }
     } catch (error) {
       console.error("Error updating loan status:", error)
-
-      if (axios.isAxiosError(error)) {
-        toast.error(`Error: ${error.response?.data?.message || "Failed to update loan status"}`)
-      } else {
-        toast.error("An unexpected error occurred")
-      }
+      toast.error("Failed to update loan status")
     } finally {
       setIsUpdatingStatus(false)
     }
@@ -464,11 +383,12 @@ const LoanRequests = (): React.ReactElement => {
     }
   }
 
-  // Format currency
+  // Helper function to format currency
   const formatCurrency = (amount: number, currency = "TND") => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("fr-TN", {
       style: "currency",
       currency: currency,
+      minimumFractionDigits: 2,
     }).format(amount)
   }
 
@@ -631,7 +551,7 @@ const LoanRequests = (): React.ReactElement => {
                         </div>
                         <div className="flex items-center mt-1">
                           <Calendar className="h-4 w-4 text-gray-400 mr-1" />
-                          <span className="text-sm text-gray-500">{request.term} months</span>
+                          <span className="text-sm text-gray-500">{request.term} </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -702,41 +622,56 @@ const LoanRequests = (): React.ReactElement => {
             })
           }}
           title="Provide Rejection Reason"
+          size="md"
         >
-          <textarea
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 mt-2"
-            rows={4}
-            value={statusUpdateData.rejectionReason}
-            onChange={(e) => setStatusUpdateData({ ...statusUpdateData, rejectionReason: e.target.value })}
-            placeholder="Please provide a reason for rejecting this loan application"
-          />
-          <div className="mt-4 flex justify-end space-x-3">
-            <button
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-              onClick={() => {
-                setShowRejectionReasonInput(false)
-                setStatusUpdateData({
-                  status: "",
-                  rejectionReason: "",
-                })
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-              onClick={submitRejection}
-              disabled={isUpdatingStatus}
-            >
-              {isUpdatingStatus ? (
-                <span className="flex items-center">
-                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                  Rejecting...
-                </span>
-              ) : (
-                "Reject Loan"
-              )}
-            </button>
+          <div className="p-6 space-y-4">
+            <div className="bg-red-50 p-4 rounded-md border-l-4 border-red-500">
+              <div className="flex">
+                <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0" />
+                <p className="text-sm text-red-700">
+                  You are about to reject this loan application. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-gray-600">Please provide a detailed reason for rejecting this loan application:</p>
+
+            <textarea
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              rows={4}
+              value={statusUpdateData.rejectionReason}
+              onChange={(e) => setStatusUpdateData({ ...statusUpdateData, rejectionReason: e.target.value })}
+              placeholder="Enter rejection reason..."
+            />
+
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                onClick={() => {
+                  setShowRejectionReasonInput(false)
+                  setStatusUpdateData({
+                    status: "",
+                    rejectionReason: "",
+                  })
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center"
+                onClick={submitRejection}
+                disabled={isUpdatingStatus}
+              >
+                {isUpdatingStatus ? (
+                  <>
+                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    Processing...
+                  </>
+                ) : (
+                  "Reject Loan"
+                )}
+              </button>
+            </div>
           </div>
         </CustomModal>
       )}
@@ -750,234 +685,361 @@ const LoanRequests = (): React.ReactElement => {
             setRejectionReason("")
           }}
           title="Reject Loan Application"
+          size="md"
         >
-          <p className="mb-4 text-sm text-gray-600">Please provide a reason for rejecting this loan application.</p>
-          <textarea
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 mt-2"
-            rows={4}
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-            placeholder="Enter rejection reason..."
-          />
-          <div className="mt-4 flex justify-end space-x-3">
-            <button
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-              onClick={() => {
-                setShowRejectionModal(false)
-                setRejectionReason("")
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center"
-              onClick={submitLoanRejection}
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                  Processing...
-                </>
-              ) : (
-                "Reject Loan"
-              )}
-            </button>
+          <div className="p-6 space-y-4">
+            <div className="bg-red-50 p-4 rounded-md border-l-4 border-red-500">
+              <div className="flex">
+                <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0" />
+                <p className="text-sm text-red-700">
+                  You are about to reject this loan application. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-gray-600">Please provide a detailed reason for rejecting this loan application:</p>
+
+            <textarea
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              rows={4}
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Enter rejection reason..."
+            />
+
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                onClick={() => {
+                  setShowRejectionModal(false)
+                  setRejectionReason("")
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center"
+                onClick={submitLoanRejection}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    Processing...
+                  </>
+                ) : (
+                  "Reject Loan"
+                )}
+              </button>
+            </div>
           </div>
         </CustomModal>
       )}
 
-      {/* Loan Details Modal */}
+      {/* Enhanced Loan Details Modal */}
       {showDetailsModal && selectedRequest && (
         <CustomModal
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
           title="Loan Application Details"
-          className="sm:max-w-4xl"
+          size="xl"
         >
-          <div className="space-y-6 max-h-[80vh] overflow-y-auto">
-            {/* Loan Summary */}
-            <div className="bg-green-600 text-white p-4 rounded-lg">
-              <div className="flex flex-col md:flex-row justify-between">
-                <div>
-                  <h3 className="text-xl font-bold">{selectedRequest.loanType} Loan</h3>
-                  <p className="text-2xl font-bold mt-2">
-                    {formatCurrency(selectedRequest.amount, selectedRequest.currency)}
-                  </p>
-                </div>
-                <div className="mt-4 md:mt-0">
-                  <StatusBadge status={selectedRequest.status} />
-                </div>
-              </div>
+          <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+            {/* Quick Actions */}
+            <div className="flex flex-wrap gap-2 mb-6 justify-end">
+              <button className="flex items-center px-3 py-1.5 bg-white text-gray-700 rounded-md border border-gray-200 text-sm hover:bg-gray-50 transition-colors">
+                <Printer className="h-4 w-4 mr-2" />
+                Print
+              </button>
+              <button className="flex items-center px-3 py-1.5 bg-white text-gray-700 rounded-md border border-gray-200 text-sm hover:bg-gray-50 transition-colors">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </button>
             </div>
 
-            {/* Applicant Information */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-medium mb-3">Applicant Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Loan Summary Card */}
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Name</p>
-                  <p className="font-medium">
-                    {selectedRequest.applicant?.name && selectedRequest.applicant.name !== 'Unknown' 
-                      ? selectedRequest.applicant.name 
-                      : (selectedRequest.applicationDetails?.personal?.firstName && selectedRequest.applicationDetails?.personal?.lastName
-                          ? `${selectedRequest.applicationDetails.personal.firstName} ${selectedRequest.applicationDetails.personal.lastName}`
-                          : 'N/A')}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium">
-                    {selectedRequest.applicationDetails?.personal?.email || selectedRequest.applicant?.email || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Phone</p>
-                  <p className="font-medium">
-                    {selectedRequest.applicationDetails?.personal?.phone || selectedRequest.applicant?.phone || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Address</p>
-                  <p className="font-medium">{selectedRequest.applicationDetails?.personal?.address || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">City</p>
-                  <p className="font-medium">{selectedRequest.applicationDetails?.personal?.city || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Postal Code</p>
-                  <p className="font-medium">{selectedRequest.applicationDetails?.personal?.postalCode || 'N/A'}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Employment Information */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-medium mb-3">Employment Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Employment Status</p>
-                  <p className="font-medium">{selectedRequest.applicationDetails?.employment?.status || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Employer Name</p>
-                  <p className="font-medium">{selectedRequest.applicationDetails?.employment?.employerName || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Monthly Income</p>
-                  <p className="font-medium">
-                    {selectedRequest.applicationDetails?.employment?.monthlyIncome 
-                      ? formatCurrency(selectedRequest.applicationDetails.employment.monthlyIncome, selectedRequest.currency) 
-                      : 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Other Loans</p>
-                  <p className="font-medium">
-                    {selectedRequest.applicationDetails?.employment?.otherLoans === true ? 'Yes' : 
-                     selectedRequest.applicationDetails?.employment?.otherLoans === false ? 'No' : 'N/A'}
-                  </p>
-                </div>
-                {selectedRequest.applicationDetails?.employment?.otherLoans && (
-                  <div>
-                    <p className="text-sm text-gray-500">Other Loans Amount</p>
-                    <p className="font-medium">
-                      {selectedRequest.applicationDetails?.employment?.otherLoansAmount 
-                        ? formatCurrency(selectedRequest.applicationDetails.employment.otherLoansAmount, selectedRequest.currency)
-                        : 'N/A'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Loan Details */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-medium mb-3">Loan Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Loan Type</p>
-                  <p className="font-medium">{selectedRequest.loanType}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Amount</p>
-                  <p className="font-medium">{formatCurrency(selectedRequest.amount, selectedRequest.currency)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Term</p>
-                  <p className="font-medium">{selectedRequest.term} months</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Interest Rate</p>
-                  <p className="font-medium">{selectedRequest.interestRate}%</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Status</p>
-                  <StatusBadge status={selectedRequest.status} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Submitted Date</p>
-                  <p className="font-medium">{formatDate(selectedRequest.submittedDate)}</p>
-                </div>
-                {selectedRequest.approvalDate && (
-                  <div>
-                    <p className="text-sm text-gray-500">Approval Date</p>
-                    <p className="font-medium">{formatDate(selectedRequest.approvalDate)}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Loan Purpose */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-medium mb-3">Loan Purpose</h3>
-              <p>{selectedRequest.applicationDetails?.purpose || selectedRequest.purpose || 'Not specified'}</p>
-            </div>
-
-            {/* Additional Information */}
-            {selectedRequest.applicationDetails?.additionalInfo && (
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="text-lg font-medium mb-3">Additional Information</h3>
-                <p>{selectedRequest.applicationDetails.additionalInfo}</p>
-              </div>
-            )}
-
-            {/* Documents */}
-            {selectedRequest.documents && Array.isArray(selectedRequest.documents) && selectedRequest.documents.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="text-lg font-medium mb-3">Submitted Documents</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Array.isArray(selectedRequest.documents) ? selectedRequest.documents.map((doc: string, index: number) => (
-                    <div key={index} className="border border-gray-200 rounded p-3">
-                      <p className="font-medium">Document {index + 1}</p>
-                      <button 
-                        className="mt-2 text-blue-600 flex items-center text-sm hover:text-blue-800"
-                        onClick={() => handleViewDocument(doc)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" /> View Document
-                      </button>
+                  <div className="flex items-center">
+                    <div className="bg-green-100 p-2 rounded-full mr-3">
+                      <DollarSign className="h-5 w-5 text-green-600" />
                     </div>
-                  )) : null}
+                    <h2 className="text-xl font-bold">{selectedRequest.loanType} Loan</h2>
+                    <div className="ml-3">
+                      <StatusBadge status={selectedRequest.status} />
+                    </div>
+                  </div>
+                  <div className="mt-3 text-3xl font-bold text-green-600">
+                    {formatCurrency(selectedRequest.amount, selectedRequest.currency)}
+                  </div>
+                  <div className="mt-2 text-sm text-gray-500">
+                    <span className="font-medium">Term:</span> {selectedRequest.term} months |
+                    <span className="font-medium ml-2">Interest Rate:</span> {selectedRequest.interestRate || 5.5}% |
+                    <span className="font-medium ml-2">Monthly Payment:</span>{" "}
+                    {formatCurrency(selectedRequest.monthlyPayment || 0, selectedRequest.currency)}
+                  </div>
+                </div>
+                <div className="mt-4 md:mt-0 flex flex-col items-end">
+                  <div className="text-sm text-gray-500">Application ID</div>
+                  <div className="font-mono text-gray-700">{selectedRequest.id}</div>
+                  <div className="text-sm text-gray-500 mt-2">Submitted on</div>
+                  <div className="font-medium">{formatDate(selectedRequest.submittedDate)}</div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* Notes */}
-            {selectedRequest.notes && (
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="text-lg font-medium mb-3">Notes</h3>
-                <p>{selectedRequest.notes}</p>
-              </div>
-            )}
+            {/* Main Content - Two Column Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-6">
+                {/* Applicant Information */}
+                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-green-100 p-2 rounded-full mr-3">
+                      <User className="h-5 w-5 text-green-600" />
+                    </div>
+                    <h3 className="text-lg font-medium">Applicant Information</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase">Name</p>
+                        <p className="font-medium">{selectedRequest.applicant.name}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase">Email</p>
+                        <p className="font-medium">{selectedRequest.applicant.email}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase">Phone</p>
+                        <p className="font-medium">{selectedRequest.applicant.phone}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Rejection Reason */}
-            {selectedRequest.status === "rejected" && selectedRequest.rejectionReason && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h3 className="text-lg font-medium mb-3 text-red-700">Rejection Reason</h3>
-                <p className="text-red-700">{selectedRequest.rejectionReason}</p>
+                {/* Loan Timeline */}
+                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-green-100 p-2 rounded-full mr-3">
+                      <BarChart4 className="h-5 w-5 text-green-600" />
+                    </div>
+                    <h3 className="text-lg font-medium">Loan Timeline</h3>
+                  </div>
+                  <div className="relative pl-8 space-y-6">
+                    {/* Timeline line */}
+                    <div className="absolute h-full w-0.5 bg-green-100 left-2 top-0"></div>
+
+                    {/* Submitted step */}
+                    <div className="relative">
+                      <div className="absolute -left-6 mt-1">
+                        <div className="bg-green-500 rounded-full h-4 w-4 border-4 border-green-50"></div>
+                      </div>
+                      <div className="flex items-center mb-1">
+                        <Calendar className="h-4 w-4 text-green-600 mr-2" />
+                        <div className="font-medium">Application Submitted</div>
+                      </div>
+                      <div className="text-sm text-gray-600">{formatDate(selectedRequest.submittedDate)}</div>
+                    </div>
+
+                    {/* Status step */}
+                    <div className="relative">
+                      <div className="absolute -left-6 mt-1">
+                        <div
+                          className={`rounded-full h-4 w-4 border-4 border-green-50 ${
+                            selectedRequest.status === "approved"
+                              ? "bg-green-500"
+                              : selectedRequest.status === "rejected"
+                                ? "bg-red-500"
+                                : "bg-yellow-500"
+                          }`}
+                        ></div>
+                      </div>
+                      <div className="flex items-center mb-1">
+                        {selectedRequest.status === "approved" ? (
+                          <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                        ) : selectedRequest.status === "rejected" ? (
+                          <XCircle className="h-4 w-4 text-red-600 mr-2" />
+                        ) : (
+                          <Clock className="h-4 w-4 text-yellow-600 mr-2" />
+                        )}
+                        <div className="font-medium">
+                          {selectedRequest.status === "approved"
+                            ? "Loan Approved"
+                            : selectedRequest.status === "rejected"
+                              ? "Loan Rejected"
+                              : "Pending Review"}
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {selectedRequest.status === "approved" && selectedRequest.approvalDate
+                          ? formatDate(selectedRequest.approvalDate)
+                          : selectedRequest.status === "rejected"
+                            ? "See rejection reason below"
+                            : "Awaiting decision"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
+
+              {/* Right Column */}
+              <div className="space-y-6">
+                {/* Purpose */}
+                {selectedRequest.purpose && (
+                  <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <div className="flex items-center mb-4">
+                      <div className="bg-green-100 p-2 rounded-full mr-3">
+                        <FileText className="h-5 w-5 text-green-600" />
+                      </div>
+                      <h3 className="text-lg font-medium">Loan Purpose</h3>
+                    </div>
+                    <p className="text-gray-700">{selectedRequest.purpose}</p>
+                  </div>
+                )}
+
+                {/* Documents */}
+                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-green-100 p-2 rounded-full mr-3">
+                      <FileCheck className="h-5 w-5 text-green-600" />
+                    </div>
+                    <h3 className="text-lg font-medium">Documents</h3>
+                  </div>
+                  {selectedRequest.documents &&
+                    (Array.isArray(selectedRequest.documents) && selectedRequest.documents.length > 0 ? (
+                      <ul className="divide-y divide-gray-200">
+                        {selectedRequest.documents.map((doc: string, index: number) => (
+                          <li key={index} className="py-3 flex justify-between items-center">
+                            <div className="flex items-center">
+                              <FileText className="h-4 w-4 text-green-500 mr-2" />
+                              <span className="text-gray-700">
+                                {typeof doc === "object" && doc !== null && "name" in doc
+                                  ? (doc as { name: string }).name
+                                  : `Document ${index + 1}`}
+                              </span>
+                            </div>
+                            <button
+                              className="text-green-600 hover:text-green-800 flex items-center text-sm bg-green-50 px-3 py-1 rounded-md"
+                              onClick={() => handleViewDocument(doc)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-500 italic">No documents attached</p>
+                    ))}
+                </div>
+
+                {/* Status Information */}
+                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-green-100 p-2 rounded-full mr-3">
+                      <Clock className="h-5 w-5 text-green-600" />
+                    </div>
+                    <h3 className="text-lg font-medium">Status Information</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase">Current Status</p>
+                      <div className="flex items-center mt-1">
+                        {selectedRequest.status === "pending" && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <Clock className="h-3 w-3 mr-1" /> Pending
+                          </span>
+                        )}
+                        {selectedRequest.status === "approved" && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <CheckCircle className="h-3 w-3 mr-1" /> Approved
+                          </span>
+                        )}
+                        {selectedRequest.status === "rejected" && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            <XCircle className="h-3 w-3 mr-1" /> Rejected
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {selectedRequest.status === "rejected" && selectedRequest.rejectionReason && (
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase">Rejection Reason</p>
+                        <div className="mt-1 p-3 bg-red-50 border border-red-100 rounded-md">
+                          <p className="text-sm text-red-700">{selectedRequest.rejectionReason}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {selectedRequest.status === "approved" && selectedRequest.approvalDate && (
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase">Approval Date</p>
+                        <p className="font-medium">{formatDate(selectedRequest.approvalDate)}</p>
+                      </div>
+                    )}
+                    
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase">Submission Date</p>
+                      <p className="font-medium">{formatDate(selectedRequest.submittedDate)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                {selectedRequest.notes && (
+                  <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <div className="flex items-center mb-4">
+                      <div className="bg-green-100 p-2 rounded-full mr-3">
+                        <FileText className="h-5 w-5 text-green-600" />
+                      </div>
+                      <h3 className="text-lg font-medium">Notes</h3>
+                    </div>
+                    <p className="text-gray-700">{selectedRequest.notes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              {selectedRequest.status === "pending" && (
+                <>
+                  <button
+                    onClick={() => updateLoanStatus(selectedRequest.id, "approved")}
+                    disabled={isUpdatingStatus}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 flex items-center"
+                  >
+                    {isUpdatingStatus ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleRejectLoan(selectedRequest)}
+                    disabled={isUpdatingStatus}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 flex items-center"
+                  >
+                    {isUpdatingStatus ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <XCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Reject
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </CustomModal>
       )}
@@ -991,42 +1053,40 @@ const LoanRequests = (): React.ReactElement => {
             setViewingDocument(null)
           }}
           title="Document Viewer"
-          className="sm:max-w-4xl"
+          size="full"
         >
-          <div className="flex flex-col items-center">
-            {viewingDocument.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-              <img 
-                src={viewingDocument} 
-                alt="Document" 
-                className="max-w-full max-h-[70vh] object-contain"
-              />
-            ) : viewingDocument.match(/\.(pdf)$/i) ? (
-              <iframe 
-                src={viewingDocument} 
-                title="PDF Document" 
-                className="w-full h-[70vh]"
-              />
-            ) : (
-              <div className="p-4 text-center">
-                <FileText className="h-16 w-16 mx-auto text-blue-500 mb-4" />
-                <p>This document type cannot be previewed.</p>
-                <a 
-                  href={viewingDocument} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Download Document
-                </a>
-              </div>
-            )}
-            <div className="mt-4">
-              <a 
-                href={viewingDocument} 
-                download 
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center"
+          <div className="p-6 flex flex-col items-center bg-gray-50 rounded-lg">
+            <div className="w-full bg-white rounded-lg shadow-sm overflow-hidden mb-4">
+              {viewingDocument.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                <img
+                  src={viewingDocument || "/placeholder.svg"}
+                  alt="Document"
+                  className="max-w-full max-h-[75vh] object-contain mx-auto"
+                />
+              ) : viewingDocument.match(/\.(pdf)$/i) ? (
+                <iframe src={viewingDocument} title="PDF Document" className="w-full h-[75vh]" />
+              ) : (
+                <div className="p-8 text-center">
+                  <FileText className="h-20 w-20 mx-auto text-green-500 mb-4" />
+                  <p className="text-lg">This document type cannot be previewed.</p>
+                  <a
+                    href={viewingDocument}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 inline-block px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                  >
+                    Open Document
+                  </a>
+                </div>
+              )}
+            </div>
+            <div className="mt-4 w-full flex justify-end">
+              <a
+                href={viewingDocument}
+                download
+                className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center"
               >
-                <Download className="h-4 w-4 mr-2" /> Download Document
+                <Download className="h-5 w-5 mr-2" /> Download Document
               </a>
             </div>
           </div>
