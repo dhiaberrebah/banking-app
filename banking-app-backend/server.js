@@ -1,13 +1,17 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const accountRoutes = require('./routes/accounts');
-const transactionRoutes = require('./routes/transactions');
-const billPaymentRoutes = require('./routes/billPayments');
-const notificationRoutes = require('./routes/notifications');
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import supportRoutes from './routes/supportRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+// import userRoutes from './routes/users.js';
+// import accountRoutes from './routes/accounts.js';
+// import transactionRoutes from './routes/transactions.js';
+// import billPaymentRoutes from './routes/billPayments.js';
+// import notificationRoutes from './routes/notifications.js';
 
 // Load environment variables
 dotenv.config();
@@ -15,16 +19,19 @@ dotenv.config();
 // Create Express app
 const app = express();
 
-// Middleware
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Your frontend URL
-    credentials: true,
-  }),
-)
+// Configure CORS
+app.use(cors({
+  origin: 'http://localhost:3000', // Your frontend URL
+  credentials: true // Allow cookies to be sent
+}));
+
+// Parse cookies
+app.use(cookieParser());
+
+// Parse JSON bodies
 app.use(express.json());
 
-
+// database connection
 // Connect to MongoDB with better error handling
 mongoose.set('strictQuery', false);
 
@@ -44,12 +51,19 @@ mongoose.connect(process.env.MONGODB_URI)
       console.error('Try resetting your password in the Atlas dashboard');
     }
   });
+//
+
+
+//api routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/accounts', accountRoutes);
-app.use('/api/transactions', transactionRoutes);
-app.use('/api/bill-payments', billPaymentRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use('/api/support', supportRoutes);
+app.use('/api/admin', adminRoutes); // Add admin routes
+// app.use('/api/users', userRoutes);
+// app.use('/api/accounts', accountRoutes);
+// app.use('/api/transactions', transactionRoutes);
+// app.use('/api/bill-payments', billPaymentRoutes);
+// app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
