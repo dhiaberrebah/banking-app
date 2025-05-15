@@ -1,17 +1,12 @@
 "use client"
 
-import type React from "react"
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import { useAuthStore } from "../store/auth-store"
 import {
   Shield,
   CreditCard,
   PiggyBank,
   TrendingUp,
   ChevronRight,
-  CheckCircle,
-  Users,
   Menu,
   X,
   ArrowRight,
@@ -24,10 +19,10 @@ import {
   MapPin,
 } from "lucide-react"
 
-const HomePage: React.FC = () => {
-  const { currentUser } = useAuthStore()
+function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [currentUser, setCurrentUser] = useState<any>(null)
 
   // Handle scroll effect for navbar
   useEffect(() => {
@@ -49,70 +44,77 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
       <nav
-        className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"}`}
+        className={`fixed w-full z-50 transition-all duration-300 ${
+          scrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-white font-bold text-xl">A</span>
-                </div>
-              </div>
-              <div className="ml-3">
-                <h1 className={`text-xl font-bold ${scrolled ? "text-blue-900" : "text-white"}`}>AMEN BANK</h1>
+                <img src="/images/amen-bank-logo.png" alt="AMEN BANK" className="h-10 w-auto" />
               </div>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/"
-                className={`font-medium ${scrolled ? "text-gray-700 hover:text-blue-700" : "text-white hover:text-blue-200"} transition-colors`}
+              <a
+                href="/"
+                className={`font-medium ${
+                  scrolled ? "text-gray-700 hover:text-green-700" : "text-white hover:text-green-200"
+                } transition-colors`}
               >
                 Home
-              </Link>
-              <Link
-                to="/about"
-                className={`font-medium ${scrolled ? "text-gray-700 hover:text-blue-700" : "text-white hover:text-blue-200"} transition-colors`}
+              </a>
+              <a
+                href="/about"
+                className={`font-medium ${
+                  scrolled ? "text-gray-700 hover:text-green-700" : "text-white hover:text-green-200"
+                } transition-colors`}
               >
                 About
-              </Link>
-              <Link
-                to="/services"
-                className={`font-medium ${scrolled ? "text-gray-700 hover:text-blue-700" : "text-white hover:text-blue-200"} transition-colors`}
+              </a>
+              <a
+                href="/services"
+                className={`font-medium ${
+                  scrolled ? "text-gray-700 hover:text-green-700" : "text-white hover:text-green-200"
+                } transition-colors`}
               >
                 Services
-              </Link>
-              <Link
-                to="/contact"
-                className={`font-medium ${scrolled ? "text-gray-700 hover:text-blue-700" : "text-white hover:text-blue-200"} transition-colors`}
+              </a>
+              <a
+                href="/contact"
+                className={`font-medium ${
+                  scrolled ? "text-gray-700 hover:text-green-700" : "text-white hover:text-green-200"
+                } transition-colors`}
               >
                 Contact
-              </Link>
+              </a>
 
               {!currentUser ? (
                 <div className="flex items-center space-x-4">
-                  <Link
-                    to="/login"
-                    className={`font-medium ${scrolled ? "text-blue-700 hover:text-blue-800" : "text-white hover:text-blue-200"} transition-colors`}
+                  <a
+                    href="/login"
+                    className={`font-medium ${
+                      scrolled ? "text-green-700 hover:text-green-800" : "text-white hover:text-green-200"
+                    } transition-colors`}
                   >
                     Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="px-4 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                  </a>
+                  <a
+                    href="/register"
+                    className="px-4 py-2 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition-colors shadow-sm"
                   >
                     Register
-                  </Link>
+                  </a>
                 </div>
               ) : (
-                <Link
-                  to={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
-                  className="px-4 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                <a
+                  href={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
+                  className="px-4 py-2 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition-colors shadow-sm"
                 >
                   Dashboard
-                </Link>
+                </a>
               )}
             </div>
 
@@ -120,7 +122,9 @@ const HomePage: React.FC = () => {
             <div className="md:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={`p-2 rounded-md ${scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-blue-800"}`}
+                className={`p-2 rounded-md ${
+                  scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-green-800"
+                }`}
               >
                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -132,61 +136,61 @@ const HomePage: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden bg-white shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <Link
-                to="/"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-gray-50"
+              <a
+                href="/"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-700 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
-              </Link>
-              <Link
-                to="/about"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-gray-50"
+              </a>
+              <a
+                href="/about"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-700 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
-              </Link>
-              <Link
-                to="/services"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-gray-50"
+              </a>
+              <a
+                href="/services"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-700 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Services
-              </Link>
-              <Link
-                to="/contact"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-gray-50"
+              </a>
+              <a
+                href="/contact"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-700 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
-              </Link>
+              </a>
 
               {!currentUser ? (
                 <div className="space-y-2 pt-2 border-t border-gray-200">
-                  <Link
-                    to="/login"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+                  <a
+                    href="/login"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-green-700 hover:text-green-800 hover:bg-green-50"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  </a>
+                  <a
+                    href="/register"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-green-600 hover:bg-green-700"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Register
-                  </Link>
+                  </a>
                 </div>
               ) : (
                 <div className="pt-2 border-t border-gray-200">
-                  <Link
-                    to={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  <a
+                    href={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-green-600 hover:bg-green-700"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
-                  </Link>
+                  </a>
                 </div>
               )}
             </div>
@@ -195,7 +199,7 @@ const HomePage: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-900 to-blue-700 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-green-900 to-green-700 overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10">
           <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -211,7 +215,7 @@ const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="relative z-10 pb-8 bg-transparent sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
             <svg
-              className="hidden lg:block absolute right-0 inset-y-0 h-full w-48 text-blue-700 transform translate-x-1/2"
+              className="hidden lg:block absolute right-0 inset-y-0 h-full w-48 text-green-700 transform translate-x-1/2"
               fill="currentColor"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
@@ -224,9 +228,9 @@ const HomePage: React.FC = () => {
               <div className="sm:text-center lg:text-left px-4 sm:px-8 xl:pl-0">
                 <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
                   <span className="block">Modern Banking for a</span>
-                  <span className="block text-blue-200">Better Future</span>
+                  <span className="block text-green-200">Better Future</span>
                 </h1>
-                <p className="mt-3 text-base text-blue-200 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                <p className="mt-3 text-base text-green-200 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                   Experience secure, innovative, and user-friendly banking services designed to meet all your financial
                   needs.
                 </p>
@@ -234,32 +238,32 @@ const HomePage: React.FC = () => {
                   {!currentUser ? (
                     <>
                       <div className="rounded-md shadow">
-                        <Link
-                          to="/register"
-                          className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-900 bg-white hover:bg-gray-100 transition-colors md:py-4 md:text-lg md:px-10"
+                        <a
+                          href="/register"
+                          className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-900 bg-white hover:bg-gray-100 transition-colors md:py-4 md:text-lg md:px-10"
                         >
                           Open an Account
                           <ArrowRight className="ml-2 h-5 w-5" />
-                        </Link>
+                        </a>
                       </div>
                       <div className="mt-3 sm:mt-0 sm:ml-3">
-                        <Link
-                          to="/login"
-                          className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-500 transition-colors md:py-4 md:text-lg md:px-10"
+                        <a
+                          href="/login"
+                          className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-500 transition-colors md:py-4 md:text-lg md:px-10"
                         >
                           Login
-                        </Link>
+                        </a>
                       </div>
                     </>
                   ) : (
                     <div className="rounded-md shadow">
-                      <Link
-                        to={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
-                        className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-900 bg-white hover:bg-gray-100 transition-colors md:py-4 md:text-lg md:px-10"
+                      <a
+                        href={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
+                        className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-900 bg-white hover:bg-gray-100 transition-colors md:py-4 md:text-lg md:px-10"
                       >
                         Go to Dashboard
                         <ArrowRight className="ml-2 h-5 w-5" />
-                      </Link>
+                      </a>
                     </div>
                   )}
                 </div>
@@ -267,28 +271,27 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         </div>
-       
       </div>
 
       {/* Quick Access Section */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 -mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 -mt-10">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
             <div className="p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-100 rounded-md p-3">
-                  <CreditCard className="h-6 w-6 text-blue-700" />
+                <div className="flex-shrink-0 bg-green-100 rounded-md p-3">
+                  <TrendingUp className="h-6 w-6 text-green-700" />
                 </div>
-                <h3 className="ml-4 text-lg font-medium text-gray-900">Personal Banking</h3>
+                <h3 className="ml-4 text-lg font-medium text-gray-900">Economiser de l&apos;argent</h3>
               </div>
               <p className="mt-4 text-base text-gray-600">
-                Accounts, cards, loans, and more for your everyday banking needs.
+                Découvrez nos solutions d&apos;épargne les plus adaptées à vos besoins.
               </p>
               <div className="mt-6">
-                <Link to="/personal-banking" className="inline-flex items-center text-blue-700 hover:text-blue-800">
+                <a href="/personal-banking" className="inline-flex items-center text-green-700 hover:text-green-800">
                   Learn more
                   <ChevronRight className="ml-1 h-4 w-4" />
-                </Link>
+                </a>
               </div>
             </div>
           </div>
@@ -296,19 +299,19 @@ const HomePage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
             <div className="p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-100 rounded-md p-3">
-                  <PiggyBank className="h-6 w-6 text-blue-700" />
+                <div className="flex-shrink-0 bg-green-100 rounded-md p-3">
+                  <PiggyBank className="h-6 w-6 text-green-700" />
                 </div>
-                <h3 className="ml-4 text-lg font-medium text-gray-900">Business Banking</h3>
+                <h3 className="ml-4 text-lg font-medium text-gray-900">Emprunter de l&apos;argent</h3>
               </div>
               <p className="mt-4 text-base text-gray-600">
-                Solutions for businesses of all sizes, from startups to enterprises.
+                Découvrez nos solutions de financement pour vous aider à concrétiser tous vos projets.
               </p>
               <div className="mt-6">
-                <Link to="/business-banking" className="inline-flex items-center text-blue-700 hover:text-blue-800">
+                <a href="/business-banking" className="inline-flex items-center text-green-700 hover:text-green-800">
                   Learn more
                   <ChevronRight className="ml-1 h-4 w-4" />
-                </Link>
+                </a>
               </div>
             </div>
           </div>
@@ -316,19 +319,40 @@ const HomePage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
             <div className="p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-100 rounded-md p-3">
-                  <TrendingUp className="h-6 w-6 text-blue-700" />
+                <div className="flex-shrink-0 bg-green-100 rounded-md p-3">
+                  <CreditCard className="h-6 w-6 text-green-700" />
                 </div>
-                <h3 className="ml-4 text-lg font-medium text-gray-900">Investments</h3>
+                <h3 className="ml-4 text-lg font-medium text-gray-900">Acheter une voiture</h3>
               </div>
               <p className="mt-4 text-base text-gray-600">
-                Grow your wealth with our range of investment products and services.
+                Profitez d&apos;un crédit adapté pour financer tout type de véhicule (voiture neuve ou d&apos;occasion).
               </p>
               <div className="mt-6">
-                <Link to="/investments" className="inline-flex items-center text-blue-700 hover:text-blue-800">
+                <a href="/investments" className="inline-flex items-center text-green-700 hover:text-green-800">
                   Learn more
                   <ChevronRight className="ml-1 h-4 w-4" />
-                </Link>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-green-100 rounded-md p-3">
+                  <Lock className="h-6 w-6 text-green-700" />
+                </div>
+                <h3 className="ml-4 text-lg font-medium text-gray-900">Acheter un bien immobilier</h3>
+              </div>
+              <p className="mt-4 text-base text-gray-600">
+                Découvrez nos solutions dédiées pour financer tous vos projets immobiliers (achat d&apos;un terrain ou
+                d&apos;un appartement, construction,...).
+              </p>
+              <div className="mt-6">
+                <a href="/investments" className="inline-flex items-center text-green-700 hover:text-green-800">
+                  Learn more
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </a>
               </div>
             </div>
           </div>
@@ -339,7 +363,7 @@ const HomePage: React.FC = () => {
       <div className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:text-center">
-            <h2 className="text-base text-blue-700 font-semibold tracking-wide uppercase">Features</h2>
+            <h2 className="text-base text-green-700 font-semibold tracking-wide uppercase">Features</h2>
             <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
               A better way to manage your finances
             </p>
@@ -351,7 +375,7 @@ const HomePage: React.FC = () => {
           <div className="mt-16">
             <div className="space-y-12 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-12">
               <div className="relative">
-                <div className="absolute flex items-center justify-center h-14 w-14 rounded-md bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg">
+                <div className="absolute flex items-center justify-center h-14 w-14 rounded-md bg-gradient-to-r from-green-700 to-green-600 text-white shadow-lg">
                   <Shield className="h-7 w-7" />
                 </div>
                 <div className="ml-20">
@@ -364,7 +388,7 @@ const HomePage: React.FC = () => {
               </div>
 
               <div className="relative">
-                <div className="absolute flex items-center justify-center h-14 w-14 rounded-md bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg">
+                <div className="absolute flex items-center justify-center h-14 w-14 rounded-md bg-gradient-to-r from-green-700 to-green-600 text-white shadow-lg">
                   <CreditCard className="h-7 w-7" />
                 </div>
                 <div className="ml-20">
@@ -377,7 +401,7 @@ const HomePage: React.FC = () => {
               </div>
 
               <div className="relative">
-                <div className="absolute flex items-center justify-center h-14 w-14 rounded-md bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg">
+                <div className="absolute flex items-center justify-center h-14 w-14 rounded-md bg-gradient-to-r from-green-700 to-green-600 text-white shadow-lg">
                   <PiggyBank className="h-7 w-7" />
                 </div>
                 <div className="ml-20">
@@ -390,7 +414,7 @@ const HomePage: React.FC = () => {
               </div>
 
               <div className="relative">
-                <div className="absolute flex items-center justify-center h-14 w-14 rounded-md bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg">
+                <div className="absolute flex items-center justify-center h-14 w-14 rounded-md bg-gradient-to-r from-green-700 to-green-600 text-white shadow-lg">
                   <TrendingUp className="h-7 w-7" />
                 </div>
                 <div className="ml-20">
@@ -419,7 +443,7 @@ const HomePage: React.FC = () => {
               <div className="mt-8 space-y-6">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-700">
+                    <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-700">
                       <Smartphone className="h-6 w-6" />
                     </div>
                   </div>
@@ -433,7 +457,7 @@ const HomePage: React.FC = () => {
 
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-700">
+                    <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-700">
                       <Lock className="h-6 w-6" />
                     </div>
                   </div>
@@ -447,7 +471,7 @@ const HomePage: React.FC = () => {
 
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-700">
+                    <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-700">
                       <Clock className="h-6 w-6" />
                     </div>
                   </div>
@@ -460,13 +484,13 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               <div className="mt-8">
-                <Link
-                  to="/mobile-banking"
-                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-700 hover:bg-blue-800 transition-colors"
+                <a
+                  href="/mobile-banking"
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-700 hover:bg-green-800 transition-colors"
                 >
                   Learn more about mobile banking
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+                </a>
               </div>
             </div>
             <div className="mt-10 lg:mt-0 lg:relative">
@@ -474,12 +498,12 @@ const HomePage: React.FC = () => {
                 <div className="relative block w-full bg-white rounded-lg overflow-hidden">
                   <img
                     className="w-full"
-                    src="/placeholder.svg?height=400&width=300"
+                    src="https://via.placeholder.com/400x300"
                     alt="Mobile banking app interface"
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="bg-white bg-opacity-75 rounded-full p-4">
-                      <svg className="h-12 w-12 text-blue-700" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-12 w-12 text-green-700" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>
@@ -492,215 +516,30 @@ const HomePage: React.FC = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-800 to-blue-700">
+      <div className="bg-gradient-to-r from-green-800 to-green-700">
         <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8 lg:flex lg:items-center lg:justify-between">
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             <span className="block">Ready to get started?</span>
-            <span className="block text-blue-200">Open an account today.</span>
+            <span className="block text-green-200">Open an account today.</span>
           </h2>
           <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
             <div className="inline-flex rounded-md shadow">
-              <Link
-                to="/register"
-                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-blue-900 bg-white hover:bg-blue-50 transition-colors"
+              <a
+                href="/register"
+                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-green-900 bg-white hover:bg-green-50 transition-colors"
               >
                 Get started
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              </a>
             </div>
             <div className="ml-3 inline-flex rounded-md shadow">
-              <Link
-                to="/login"
-                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-500 transition-colors"
+              <a
+                href="/login"
+                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-500 transition-colors"
               >
                 Login
-              </Link>
+              </a>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Testimonials Section */}
-      <div className="bg-white py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:text-center">
-            <h2 className="text-base text-blue-700 font-semibold tracking-wide uppercase">Testimonials</h2>
-            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              Trusted by thousands of customers
-            </p>
-            <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
-              Hear what our customers have to say about their experience with AMEN Bank.
-            </p>
-          </div>
-          <div className="mt-16">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              <div className="bg-gray-50 p-8 rounded-xl shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="flex items-center mb-6">
-                  <div className="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Users className="h-7 w-7 text-blue-700" />
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">Sarah Johnson</h3>
-                    <p className="text-sm text-gray-500">Small Business Owner</p>
-                  </div>
-                </div>
-                <div className="relative">
-                  <svg
-                    className="absolute top-0 left-0 h-8 w-8 text-gray-200 transform -translate-x-3 -translate-y-2"
-                    fill="currentColor"
-                    viewBox="0 0 32 32"
-                    aria-hidden="true"
-                  >
-                    <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-                  </svg>
-                  <p className="relative text-gray-600 mt-2">
-                    "AMEN Bank's business loan helped me expand my store. The process was smooth and the staff was
-                    incredibly helpful. I couldn't be happier with the service I received."
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-8 rounded-xl shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="flex items-center mb-6">
-                  <div className="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Users className="h-7 w-7 text-blue-700" />
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">Mohammed Ali</h3>
-                    <p className="text-sm text-gray-500">Homeowner</p>
-                  </div>
-                </div>
-                <div className="relative">
-                  <svg
-                    className="absolute top-0 left-0 h-8 w-8 text-gray-200 transform -translate-x-3 -translate-y-2"
-                    fill="currentColor"
-                    viewBox="0 0 32 32"
-                    aria-hidden="true"
-                  >
-                    <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-                  </svg>
-                  <p className="relative text-gray-600 mt-2">
-                    "The mortgage team at AMEN Bank made buying our first home a breeze. They explained everything
-                    clearly and got us a great rate. I would recommend their services to anyone looking to buy a home."
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-8 rounded-xl shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="flex items-center mb-6">
-                  <div className="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Users className="h-7 w-7 text-blue-700" />
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">Leila Ben Salah</h3>
-                    <p className="text-sm text-gray-500">Student</p>
-                  </div>
-                </div>
-                <div className="relative">
-                  <svg
-                    className="absolute top-0 left-0 h-8 w-8 text-gray-200 transform -translate-x-3 -translate-y-2"
-                    fill="currentColor"
-                    viewBox="0 0 32 32"
-                    aria-hidden="true"
-                  >
-                    <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-                  </svg>
-                  <p className="relative text-gray-600 mt-2">
-                    "The student account at AMEN Bank has no fees and their mobile app makes it easy to manage my
-                    finances while studying. The customer service team is always helpful when I have questions."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Why Choose Us Section */}
-      <div className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:text-center">
-            <h2 className="text-base text-blue-700 font-semibold tracking-wide uppercase">Why Choose Us</h2>
-            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              Banking that puts you first
-            </p>
-            <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
-              At AMEN Bank, we're committed to providing exceptional service and innovative solutions to meet your
-              financial needs.
-            </p>
-          </div>
-
-          <div className="mt-16">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <div className="bg-white p-6 rounded-lg shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <CheckCircle className="h-6 w-6 text-green-500" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-lg font-medium text-gray-900">Established Trust</h3>
-                    <p className="mt-2 text-base text-gray-600">
-                      Over 30 years of banking excellence in Tunisia, serving generations of customers with integrity
-                      and reliability.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <CheckCircle className="h-6 w-6 text-green-500" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-lg font-medium text-gray-900">Customer-Centric</h3>
-                    <p className="mt-2 text-base text-gray-600">
-                      Personalized service tailored to your unique needs, with dedicated relationship managers for every
-                      customer.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <CheckCircle className="h-6 w-6 text-green-500" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-lg font-medium text-gray-900">Digital Innovation</h3>
-                    <p className="mt-2 text-base text-gray-600">
-                      Cutting-edge online and mobile banking solutions that make managing your finances simple and
-                      convenient.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <CheckCircle className="h-6 w-6 text-green-500" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-lg font-medium text-gray-900">Community Focused</h3>
-                    <p className="mt-2 text-base text-gray-600">
-                      Investing in local communities and sustainable initiatives to create a better future for everyone.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-16 text-center">
-            <Link
-              to="/register"
-              className="inline-flex items-center px-8 py-4 border border-transparent text-base font-medium rounded-md shadow-lg text-white bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 transition-colors transform hover:scale-105"
-            >
-              Join AMEN Bank Today
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Link>
           </div>
         </div>
       </div>
@@ -711,10 +550,7 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-1">
               <div className="flex items-center">
-                <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-white font-bold text-xl">A</span>
-                </div>
-                <h2 className="ml-3 text-xl font-bold">AMEN BANK</h2>
+                <img src="/images/amen-bank-logo.png" alt="AMEN BANK" className="h-10 w-auto" />
               </div>
               <p className="mt-4 text-sm text-gray-400">
                 Your trusted banking partner for over 30 years, providing innovative financial solutions for individuals
@@ -754,24 +590,24 @@ const HomePage: React.FC = () => {
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">Products</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link to="/accounts" className="text-base text-gray-400 hover:text-white">
+                    <a href="/accounts" className="text-base text-gray-400 hover:text-white">
                       Accounts
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/cards" className="text-base text-gray-400 hover:text-white">
+                    <a href="/cards" className="text-base text-gray-400 hover:text-white">
                       Cards
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/loans" className="text-base text-gray-400 hover:text-white">
+                    <a href="/loans" className="text-base text-gray-400 hover:text-white">
                       Loans
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/investments" className="text-base text-gray-400 hover:text-white">
+                    <a href="/investments" className="text-base text-gray-400 hover:text-white">
                       Investments
-                    </Link>
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -779,24 +615,24 @@ const HomePage: React.FC = () => {
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">Support</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link to="/help" className="text-base text-gray-400 hover:text-white">
+                    <a href="/help" className="text-base text-gray-400 hover:text-white">
                       Help Center
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/contact" className="text-base text-gray-400 hover:text-white">
+                    <a href="/contact" className="text-base text-gray-400 hover:text-white">
                       Contact Us
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/faq" className="text-base text-gray-400 hover:text-white">
+                    <a href="/faq" className="text-base text-gray-400 hover:text-white">
                       FAQs
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/security" className="text-base text-gray-400 hover:text-white">
+                    <a href="/security" className="text-base text-gray-400 hover:text-white">
                       Security
-                    </Link>
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -828,15 +664,15 @@ const HomePage: React.FC = () => {
               &copy; {new Date().getFullYear()} AMEN Bank. All rights reserved.
             </p>
             <div className="mt-4 flex justify-center space-x-6">
-              <Link to="/terms" className="text-sm text-gray-400 hover:text-white">
+              <a href="/terms" className="text-sm text-gray-400 hover:text-white">
                 Terms of Service
-              </Link>
-              <Link to="/privacy" className="text-sm text-gray-400 hover:text-white">
+              </a>
+              <a href="/privacy" className="text-sm text-gray-400 hover:text-white">
                 Privacy Policy
-              </Link>
-              <Link to="/cookies" className="text-sm text-gray-400 hover:text-white">
+              </a>
+              <a href="/cookies" className="text-sm text-gray-400 hover:text-white">
                 Cookie Policy
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -845,4 +681,4 @@ const HomePage: React.FC = () => {
   )
 }
 
-export default HomePage
+export default App
