@@ -1,12 +1,10 @@
 "use client"
 
 import React, { useState } from "react"
-import { Link } from "react-router-dom"
 import { Phone, Mail, MapPin, Clock, Menu, X, Send, Building, Globe, ChevronDown } from "lucide-react"
-import { useAuthStore } from "../../store/auth-store"
 
 const ContactPage: React.FC = () => {
-  const { currentUser } = useAuthStore()
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [formData, setFormData] = useState({
@@ -200,78 +198,71 @@ const ContactPage: React.FC = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Link to="/">
-                  <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-md">
-                    <span className="text-white font-bold text-xl">A</span>
-                  </div>
-                </Link>
-              </div>
-              <div className="ml-3">
-                <Link to="/">
-                  <h1 className={`text-xl font-bold ${scrolled ? "text-blue-900" : "text-blue-900"}`}>AMEN BANK</h1>
-                </Link>
+                <a href="/">
+                  <img src="/images/amen-bank-logo.png" alt="AMEN BANK" className="h-10 w-auto" />
+                </a>
               </div>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/"
+              <a
+                href="/"
                 className={`font-medium ${
-                  scrolled ? "text-gray-700 hover:text-blue-700" : "text-gray-700 hover:text-blue-700"
+                  scrolled ? "text-gray-700 hover:text-green-700" : "text-gray-700 hover:text-green-700"
                 } transition-colors`}
               >
                 Home
-              </Link>
-              <Link
-                to="/about"
+              </a>
+              <a
+                href="/about"
                 className={`font-medium ${
-                  scrolled ? "text-gray-700 hover:text-blue-700" : "text-gray-700 hover:text-blue-700"
+                  scrolled ? "text-gray-700 hover:text-green-700" : "text-gray-700 hover:text-green-700"
                 } transition-colors`}
               >
                 About
-              </Link>
-              <Link
-                to="/services"
+              </a>
+              <a
+                href="/services"
                 className={`font-medium ${
-                  scrolled ? "text-gray-700 hover:text-blue-700" : "text-gray-700 hover:text-blue-700"
+                  scrolled ? "text-gray-700 hover:text-green-700" : "text-gray-700 hover:text-green-700"
                 } transition-colors`}
               >
                 Services
-              </Link>
-              <Link
-                to="/contact"
+              </a>
+              <a
+                href="/contact"
                 className={`font-medium ${
-                  scrolled ? "text-blue-700 hover:text-blue-900" : "text-blue-700 hover:text-blue-900"
+                  scrolled ? "text-green-700 hover:text-green-900" : "text-green-700 hover:text-green-900"
                 } transition-colors`}
               >
                 Contact
-              </Link>
+              </a>
 
               {!currentUser ? (
                 <div className="flex items-center space-x-4">
-                  <Link
-                    to="/login"
+                  <a
+                    href="/login"
                     className={`font-medium ${
-                      scrolled ? "text-blue-700 hover:text-blue-800" : "text-blue-700 hover:text-blue-800"
+                      scrolled ? "text-green-700 hover:text-green-800" : "text-green-700 hover:text-green-800"
                     } transition-colors`}
                   >
                     Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="px-4 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                  </a>
+                  <a
+                    href="/register"
+                    className="px-4 py-2 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition-colors shadow-sm"
                   >
                     Register
-                  </Link>
+                  </a>
                 </div>
               ) : (
-                <Link
-                  to={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
-                  className="px-4 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                <a
+                  href={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
+                  className="px-4 py-2 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition-colors shadow-sm"
                 >
                   Dashboard
-                </Link>
+                </a>
               )}
             </div>
 
@@ -293,61 +284,61 @@ const ContactPage: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden bg-white shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <Link
-                to="/"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-gray-50"
+              <a
+                href="/"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-700 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
-              </Link>
-              <Link
-                to="/about"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-gray-50"
+              </a>
+              <a
+                href="/about"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-700 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
-              </Link>
-              <Link
-                to="/services"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-gray-50"
+              </a>
+              <a
+                href="/services"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-700 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Services
-              </Link>
-              <Link
-                to="/contact"
-                className="block px-3 py-2 rounded-md text-base font-medium text-blue-700 hover:text-blue-900 hover:bg-blue-50"
+              </a>
+              <a
+                href="/contact"
+                className="block px-3 py-2 rounded-md text-base font-medium text-green-700 hover:text-green-900 hover:bg-green-50"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
-              </Link>
+              </a>
 
               {!currentUser ? (
                 <div className="space-y-2 pt-2 border-t border-gray-200">
-                  <Link
-                    to="/login"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+                  <a
+                    href="/login"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-green-700 hover:text-green-800 hover:bg-green-50"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  </a>
+                  <a
+                    href="/register"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-green-600 hover:bg-green-700"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Register
-                  </Link>
+                  </a>
                 </div>
               ) : (
                 <div className="pt-2 border-t border-gray-200">
-                  <Link
-                    to={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  <a
+                    href={currentUser?.role === "admin" ? "/admin" : "/dashboard"}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-white bg-green-600 hover:bg-green-700"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
-                  </Link>
+                  </a>
                 </div>
               )}
             </div>
@@ -360,10 +351,10 @@ const ContactPage: React.FC = () => {
         <div
           className="absolute top-0 w-full h-full bg-center bg-cover"
           style={{
-            backgroundImage: "url('/placeholder.svg?height=600&width=1200')",
+            backgroundImage: "url('https://via.placeholder.com/1200x600')",
           }}
         >
-          <span className="w-full h-full absolute opacity-75 bg-gradient-to-r from-blue-900 to-blue-700"></span>
+          <span className="w-full h-full absolute opacity-75 bg-gradient-to-r from-green-900 to-green-700"></span>
         </div>
         <div className="container relative mx-auto">
           <div className="items-center flex flex-wrap">
@@ -409,7 +400,7 @@ const ContactPage: React.FC = () => {
                         <div className="space-y-6">
                           <div className="flex items-start">
                             <div className="flex-shrink-0">
-                              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-700">
+                              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-700">
                                 <Phone className="h-6 w-6" />
                               </div>
                             </div>
@@ -421,7 +412,7 @@ const ContactPage: React.FC = () => {
                           </div>
                           <div className="flex items-start">
                             <div className="flex-shrink-0">
-                              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-700">
+                              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-700">
                                 <Mail className="h-6 w-6" />
                               </div>
                             </div>
@@ -433,7 +424,7 @@ const ContactPage: React.FC = () => {
                           </div>
                           <div className="flex items-start">
                             <div className="flex-shrink-0">
-                              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-700">
+                              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-700">
                                 <MapPin className="h-6 w-6" />
                               </div>
                             </div>
@@ -445,7 +436,7 @@ const ContactPage: React.FC = () => {
                           </div>
                           <div className="flex items-start">
                             <div className="flex-shrink-0">
-                              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-700">
+                              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-700">
                                 <Clock className="h-6 w-6" />
                               </div>
                             </div>
@@ -460,7 +451,7 @@ const ContactPage: React.FC = () => {
                         <div className="mt-8">
                           <h4 className="text-lg font-medium text-gray-900 mb-4">Follow Us</h4>
                           <div className="flex space-x-4">
-                            <a href="#" className="text-gray-400 hover:text-blue-700 transition-colors duration-300">
+                            <a href="#" className="text-gray-400 hover:text-green-700 transition-colors duration-300">
                               <span className="sr-only">Facebook</span>
                               <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path
@@ -470,7 +461,7 @@ const ContactPage: React.FC = () => {
                                 />
                               </svg>
                             </a>
-                            <a href="#" className="text-gray-400 hover:text-blue-700 transition-colors duration-300">
+                            <a href="#" className="text-gray-400 hover:text-green-700 transition-colors duration-300">
                               <span className="sr-only">Instagram</span>
                               <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path
@@ -480,13 +471,13 @@ const ContactPage: React.FC = () => {
                                 />
                               </svg>
                             </a>
-                            <a href="#" className="text-gray-400 hover:text-blue-700 transition-colors duration-300">
+                            <a href="#" className="text-gray-400 hover:text-green-700 transition-colors duration-300">
                               <span className="sr-only">Twitter</span>
                               <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
                               </svg>
                             </a>
-                            <a href="#" className="text-gray-400 hover:text-blue-700 transition-colors duration-300">
+                            <a href="#" className="text-gray-400 hover:text-green-700 transition-colors duration-300">
                               <span className="sr-only">LinkedIn</span>
                               <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
@@ -544,7 +535,7 @@ const ContactPage: React.FC = () => {
                                     onChange={handleInputChange}
                                     className={`block w-full rounded-md border ${
                                       formErrors.name ? "border-red-300" : "border-gray-300"
-                                    } py-3 px-4 shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                                    } py-3 px-4 shadow-sm focus:border-green-500 focus:ring-green-500`}
                                     placeholder="John Doe"
                                   />
                                   {formErrors.name && <p className="mt-2 text-sm text-red-600">{formErrors.name}</p>}
@@ -563,7 +554,7 @@ const ContactPage: React.FC = () => {
                                     onChange={handleInputChange}
                                     className={`block w-full rounded-md border ${
                                       formErrors.email ? "border-red-300" : "border-gray-300"
-                                    } py-3 px-4 shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                                    } py-3 px-4 shadow-sm focus:border-green-500 focus:ring-green-500`}
                                     placeholder="you@example.com"
                                   />
                                   {formErrors.email && <p className="mt-2 text-sm text-red-600">{formErrors.email}</p>}
@@ -581,7 +572,7 @@ const ContactPage: React.FC = () => {
                                   name="phone"
                                   value={formData.phone}
                                   onChange={handleInputChange}
-                                  className="block w-full rounded-md border border-gray-300 py-3 px-4 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                  className="block w-full rounded-md border border-gray-300 py-3 px-4 shadow-sm focus:border-green-500 focus:ring-green-500"
                                   placeholder="+216 71 123 456"
                                 />
                               </div>
@@ -598,7 +589,7 @@ const ContactPage: React.FC = () => {
                                   onChange={handleInputChange}
                                   className={`block w-full rounded-md border ${
                                     formErrors.subject ? "border-red-300" : "border-gray-300"
-                                  } py-3 px-4 shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                                  } py-3 px-4 shadow-sm focus:border-green-500 focus:ring-green-500`}
                                 >
                                   <option value="">Select a subject</option>
                                   <option value="General Inquiry">General Inquiry</option>
@@ -626,7 +617,7 @@ const ContactPage: React.FC = () => {
                                   onChange={handleInputChange}
                                   className={`block w-full rounded-md border ${
                                     formErrors.message ? "border-red-300" : "border-gray-300"
-                                  } py-3 px-4 shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                                  } py-3 px-4 shadow-sm focus:border-green-500 focus:ring-green-500`}
                                   placeholder="How can we help you?"
                                 />
                                 {formErrors.message && (
@@ -638,7 +629,7 @@ const ContactPage: React.FC = () => {
                               <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="inline-flex justify-center items-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full transition-colors duration-300"
+                                className="inline-flex justify-center items-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 w-full transition-colors duration-300"
                               >
                                 {isSubmitting ? (
                                   <>
@@ -702,7 +693,7 @@ const ContactPage: React.FC = () => {
                 <div className="bg-white rounded-lg shadow-md p-6 h-full transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                   <div className="flex items-center mb-4">
                     <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-700">
+                      <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-700">
                         <Building className="h-6 w-6" />
                       </div>
                     </div>
@@ -733,7 +724,7 @@ const ContactPage: React.FC = () => {
                       href={`https://maps.google.com/?q=${encodeURIComponent(branch.address)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center text-blue-700 hover:text-blue-800"
+                      className="inline-flex items-center text-green-700 hover:text-green-800"
                     >
                       View on Map
                       <svg
@@ -771,7 +762,7 @@ const ContactPage: React.FC = () => {
               <div className="relative h-96 rounded-lg overflow-hidden shadow-lg">
                 {/* This would be replaced with an actual map component in a real implementation */}
                 <img
-                  src="/placeholder.svg?height=600&width=1200"
+                  src="https://via.placeholder.com/1200x600"
                   alt="Map location"
                   className="w-full h-full object-cover"
                 />
@@ -835,7 +826,7 @@ const ContactPage: React.FC = () => {
                 <div className="mt-6">
                   <a
                     href="tel:+21671123456"
-                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300"
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-300"
                   >
                     <Phone className="mr-2 h-5 w-5" />
                     Call Customer Support
@@ -847,18 +838,13 @@ const ContactPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Remove the Live Chat CTA section */}
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-1">
               <div className="flex items-center">
-                <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-white font-bold text-xl">A</span>
-                </div>
-                <h2 className="ml-3 text-xl font-bold">AMEN BANK</h2>
+                <img src="/images/amen-bank-logo.png" alt="AMEN BANK" className="h-10 w-auto" />
               </div>
               <p className="mt-4 text-sm text-gray-400">
                 Your trusted banking partner for over 30 years, providing innovative financial solutions for individuals
@@ -898,24 +884,24 @@ const ContactPage: React.FC = () => {
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">Products</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link to="/accounts" className="text-base text-gray-400 hover:text-white">
+                    <a href="/accounts" className="text-base text-gray-400 hover:text-white">
                       Accounts
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/cards" className="text-base text-gray-400 hover:text-white">
+                    <a href="/cards" className="text-base text-gray-400 hover:text-white">
                       Cards
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/loans" className="text-base text-gray-400 hover:text-white">
+                    <a href="/loans" className="text-base text-gray-400 hover:text-white">
                       Loans
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/investments" className="text-base text-gray-400 hover:text-white">
+                    <a href="/investments" className="text-base text-gray-400 hover:text-white">
                       Investments
-                    </Link>
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -923,24 +909,24 @@ const ContactPage: React.FC = () => {
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">Support</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link to="/help" className="text-base text-gray-400 hover:text-white">
+                    <a href="/help" className="text-base text-gray-400 hover:text-white">
                       Help Center
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/contact" className="text-base text-gray-400 hover:text-white">
+                    <a href="/contact" className="text-base text-gray-400 hover:text-white">
                       Contact Us
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/faq" className="text-base text-gray-400 hover:text-white">
+                    <a href="/faq" className="text-base text-gray-400 hover:text-white">
                       FAQs
-                    </Link>
+                    </a>
                   </li>
                   <li>
-                    <Link to="/security" className="text-base text-gray-400 hover:text-white">
+                    <a href="/security" className="text-base text-gray-400 hover:text-white">
                       Security
-                    </Link>
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -972,15 +958,15 @@ const ContactPage: React.FC = () => {
               &copy; {new Date().getFullYear()} AMEN Bank. All rights reserved.
             </p>
             <div className="mt-4 flex justify-center space-x-6">
-              <Link to="/terms" className="text-sm text-gray-400 hover:text-white">
+              <a href="/terms" className="text-sm text-gray-400 hover:text-white">
                 Terms of Service
-              </Link>
-              <Link to="/privacy" className="text-sm text-gray-400 hover:text-white">
+              </a>
+              <a href="/privacy" className="text-sm text-gray-400 hover:text-white">
                 Privacy Policy
-              </Link>
-              <Link to="/cookies" className="text-sm text-gray-400 hover:text-white">
+              </a>
+              <a href="/cookies" className="text-sm text-gray-400 hover:text-white">
                 Cookie Policy
-              </Link>
+              </a>
             </div>
           </div>
         </div>

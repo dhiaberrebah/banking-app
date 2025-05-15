@@ -21,11 +21,11 @@ const AdminSidebar = () => {
       icon: User,
       path: "/admin/profile",
     },
-    {
-      title: "Transaction History",
-      icon: History,
-      path: "/admin/permissions",
-    },
+    // {
+    //   title: "Transaction History",
+    //   icon: History,
+    //   path: "/admin/permissions",
+    // },
     {
       title: "Account Requests",
       icon: CreditCard,

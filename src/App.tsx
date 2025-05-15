@@ -31,7 +31,7 @@ import Settings from "./pages/User/settings"
 import AdminLayout from "./components/admin compoents/layout"
 import AdminDashboard from "./pages/admin/dashboard"
 import UserManagement from "./pages/admin/userManagement"
-import Permissions from "./pages/admin/permission"
+// import Permissions from "./pages/admin/permission"
 import AccountRequests from "./pages/admin/accountReq"
 import LoanRequests from "./pages/admin/loanReq"
 import Monitoring from "./pages/admin/monitoring"
@@ -197,7 +197,7 @@ function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
-          <Route path="permissions" element={<Permissions />} />
+          {/* <Route path="permissions" element={<Permissions />} /> */}
           <Route path="profile" element={<AdminProfile />} />
           <Route path="requests/accounts" element={<AccountRequests />} />
           <Route path="requests/loans" element={<LoanRequests />} />
