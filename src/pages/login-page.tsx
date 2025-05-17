@@ -265,18 +265,9 @@ export default function LoginPage() {
       <header className="bg-white/80 backdrop-blur-sm py-4 shadow-sm border-b border-gray-200 relative z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded flex items-center justify-center shadow-md transform transition-transform hover:scale-105">
-                  <span className="text-white font-bold text-xl">A</span>
-                </div>
-              </div>
-              <div className="ml-3">
-                <h1 className="text-xl font-bold text-gray-900">AMEN BANK</h1>
-              </div>
-            </div>
+            
             <Link
-              to="/signup"
+              to="/register"
               className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors relative group"
             >
               Don't have an account? Sign up
