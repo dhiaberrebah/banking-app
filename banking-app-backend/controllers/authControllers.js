@@ -150,6 +150,8 @@ export const signup = async (req, res) => {
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 12);
+    console.log('Original password:', password);
+    console.log('Hashed password:', hashedPassword);
 
     // Create a new user with all the form fields
     const newUser = await User.create({
